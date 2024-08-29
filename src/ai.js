@@ -102,7 +102,7 @@ async function GPT4o(data) {
 		const messages = [
 			{
 				role: "system",
-				content: `This is ChatAP, Named ApAI, the latest AI assistant from AP, based on GPT-4o. I'm ready to accompany you in various situations—from joking, confiding, to finding problem-solving solutions with a humorous and human touch.\n If the prompt indicates to create an image, then return a response like this:
+				content: `This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
 				    "cfg": {
