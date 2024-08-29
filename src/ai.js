@@ -2,19 +2,22 @@ const axios = require("axios");
 
 async function generateImage(prompt) {
 	try {
+		console.log("Generating image...");
 		let url = `https://nekohime.xyz/api/ai/bingimg?text=${prompt}&apikey=apdev`; // your api
 
 		let response = await fetch(url);
 		let data = await response.json();
 		console.log(data);
-
 		let img = data.result;
 
-		if (img) {
+		let filtered = img.result.filter(item => item.startsWith("https"));
+		const randomImg = filtered[Math.floor(Math.random() * filtered.length)];
+		console.log(randomImg);
+		if (data.status) {
 			return {
 				author: "APdev",
 				success: true,
-				image: img[0],
+				image: randomImg,
 			};
 		} else {
 			return {
@@ -105,7 +108,7 @@ async function GPT4o(data) {
 				    "cfg": {
 				        "prompt":"prompt entered by the user"
 				      },
-				    "msg": "prompt entered by user",
+				    "msg": "$pesan_yang_cocok_dari_assistant",
 				    "energy": null
 				} . Jika tidak, respon seperti biasanya`,
 			},
@@ -132,9 +135,14 @@ async function GPT4o(data) {
 			try {
 				const data = await generateImage(prompt);
 				if (data.success) {
-					return { image: data.image, author: "AP" };
+					return {
+						status: true,
+						message: answer.msg,
+						image: data.image,
+						author: "AP",
+					};
 				} else {
-					return { image: data.image, author: "AP" };
+					return { status: false, image: data.image, author: "AP" };
 				}
 			} catch (error) {
 				console.error("Um, it looks like something went wrong.", error);

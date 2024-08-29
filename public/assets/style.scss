@@ -6,7 +6,7 @@ $light-r-bubble: #c5e5ff;
 $light-border: #d0d3d8;
 $light-nav: #f7faff;
 $light-input: #f7faff;
-$light-bg-quote: #c2c6d1;
+$light-bg-quote: #c2c6d14f;
 
 $dark-bg: #1f2128;
 $dark-text: #e9eaee;
@@ -16,7 +16,7 @@ $dark-r-bubble: #44728b;
 $dark-border: #40444b;
 $dark-nav: #1f2128;
 $dark-input: #2b323f;
-$dark-bg-quote: #3d4047;
+$dark-bg-quote: #3d40475d;
 
 :root {
 	--bg-color: #{$light-bg};
@@ -188,7 +188,7 @@ pre {
 }
 
 .err-msg {
-	color: red;
+	color: var(--text-color);
 }
 button {
 	padding: 5px !important;

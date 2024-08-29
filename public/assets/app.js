@@ -157,7 +157,7 @@ function renderMessages(messages) {
 				const image = document.createElement("img");
 				image.src = message.content;
 				if (!image.src.startsWith("https")) {
-					errorMessage("Cannot create images");
+					errorMessage("Something went wrong, canot generate image, try again.");
 				} else {
 					image.classList.add("chat-image");
 					chatContent.appendChild(image);

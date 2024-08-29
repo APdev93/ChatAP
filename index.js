@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 const corsOptions = {
-	origin: "https://ai.ardian.store",
+	origin: "https://ai.apdev.my.id",
 	optionsSuccessStatus: 200,
 };
 
@@ -153,11 +153,17 @@ io.on("connection", sock => {
 			const responseData = await response.json();
 
 			if (responseData.image) {
+				if (responseData.status) {
+					const newAMessage = {
+						role: "assistant",
+						content: responseData.message,
+					};
+					sock.emit("chat response", newAMessage);
+				}
 				const newMessage = {
 					role: "images",
 					content: responseData.image,
 				};
-
 				sock.emit("chat response", newMessage);
 			} else {
 				const assistantResponse = responseData.data;
