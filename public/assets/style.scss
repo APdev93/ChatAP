@@ -31,6 +31,27 @@ $dark-bg-quote: #3d40475d;
 
 /* HTML: <div class="loader"></div> */
 /* HTML: <div class="loader"></div> */
+
+.loading {
+	width: 25px;
+	height: 25px;
+	border: 3px solid black;
+	border-bottom-color: transparent;
+	border-radius: 50%;
+	display: inline-block;
+	box-sizing: border-box;
+	animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
 .loader {
 	width: 25px;
 	aspect-ratio: 4;

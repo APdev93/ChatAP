@@ -183,9 +183,7 @@ function renderMessages(messages) {
 								behavior: "smooth",
 							});
 							if (wordIndex === 1) {
-								btnSend.innerHTML = `<div class="spinner-border" role="status">
-						                            <span class="visually-hidden">Loading...</span>
-                                                </div>`;
+								btnSend.innerHTML = `<span class="loading"></span>`;
 								btnSend.setAttribute("disabled", "true");
 							} else if (wordIndex === words.length) {
 								btnSend.innerHTML = `<i class="fa-solid fa-arrow-up"></i>`;
