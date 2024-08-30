@@ -187,7 +187,7 @@ async function GPT4o(data) {
 						author: "AP",
 					};
 				} else {
-					return { status: false, image: data.image, author: "AP" };
+					return { status: false, image: null, author: "AP" };
 				}
 			} catch (error) {
 				console.error("Um, it looks like something went wrong.", error);
