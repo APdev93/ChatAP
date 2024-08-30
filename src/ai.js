@@ -1,12 +1,19 @@
 const axios = require("axios");
 const { ImageGen } = require("./bing");
 
+const cookies = [
+	"10g0hhWnfelLm8N32MU1ATKECUTaRLBYwC-M7lfO7euODTQOGs3HStuLHtx-ShkEZHtackX5AFUGCtx2dG2iUX_It7TA5198oMkj_A4IIuTXQ-3vF8Us4Vuz8fLevtFD4LAtGygDA4k4_wG73TAtqU6sC_Oax1V9RpC0acJ4B9I4eK2Fr3q4d6Bc4gfj5kJEYhEr_UaHog56f9efTE8zCpw",
+	"1tBqBgOXDewYQsibIlviW6vbFU3FPcbfMLqetjMOQ0K9-CC0t40uynErXyBoOck1OdHpzAlmA8_kilSx-KfT8WhjPPIQkXhnzPaKM5ZkYSs9Rr2FwLM4Za3Xm6-vJjq92daNK4Ms1B3-YBHq9U_arzaeMUB4yOK8HL2NTGyWjf4KsJlhf4XteUs3iPrT2KaVyy3xAZuoTTfX4YrMyULbnHQ",
+];
+
+function getRandom(array) {
+	const randomIndex = Math.floor(Math.random() * array.length);
+	return array[randomIndex];
+}
+
 async function generateImage(prompt) {
 	try {
-		const bing = new ImageGen(
-			"1tBqBgOXDewYQsibIlviW6vbFU3FPcbfMLqetjMOQ0K9-CC0t40uynErXyBoOck1OdHpzAlmA8_kilSx-KfT8WhjPPIQkXhnzPaKM5ZkYSs9Rr2FwLM4Za3Xm6-vJjq92daNK4Ms1B3-YBHq9U_arzaeMUB4yOK8HL2NTGyWjf4KsJlhf4XteUs3iPrT2KaVyy3xAZuoTTfX4YrMyULbnHQ",
-		);
-
+		const bing = new ImageGen(getRandom(cookies));
 		let response = await bing.get_images(prompt);
 		let img = response.map(url => url.replace(/\.svg$/, ""));
 		console.log(img);
@@ -66,7 +73,6 @@ async function gpt(data) {
 }
 
 const jsonExtractor = text => {
-	console.log("Json extraxtor: ", text);
 	try {
 		const jsonStart = text.indexOf("{");
 		const jsonEnd = text.lastIndexOf("}") + 1;
@@ -81,7 +87,6 @@ const jsonExtractor = text => {
 			cmd: cmd,
 			cfg: cfg,
 			msg: msg,
-			energy: energy,
 		};
 	} catch (error) {
 		console.error("Error extracting or parsing JSON:", error);
@@ -89,7 +94,6 @@ const jsonExtractor = text => {
 			cmd: null,
 			cfg: null,
 			msg: text,
-			energy: null,
 		};
 	}
 };
@@ -105,8 +109,7 @@ async function GPT4o(data) {
 				    "cfg": {
 				        "prompt":"prompt entered by the user"
 				      },
-				    "msg": "$pesan_yang_cocok_dari_assistant",
-				    "energy": null
+				    "msg": "$pesan_yang_cocok_dari_assistant"
 				} . Jika tidak, respon seperti biasanya`,
 			},
 			...data,
@@ -143,6 +146,7 @@ async function GPT4o(data) {
 				}
 			} catch (error) {
 				console.error("Um, it looks like something went wrong.", error);
+				return { status: false, image: null, author: "AP" };
 			}
 		} else {
 			return { data: answer.msg, author: "AP" };

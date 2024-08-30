@@ -32,8 +32,8 @@ const error_unsupported_lang =
 	"\nthis language is currently not supported by bing";
 const error_bad_images = "Bad images";
 const error_no_images = "No images";
-const sending_message = "Sending request...";
-const wait_message = "Waiting for results...";
+const sending_message = "Trying to generate images";
+const wait_message = "Generating images";
 const download_message = "\nDownloading images...";
 
 class ImageGen {
@@ -540,4 +540,3 @@ function pickRandom(list) {
 	return list[Math.floor(list.length * Math.random())];
 }
 module.exports = { ImageGen, BingChat };
-
