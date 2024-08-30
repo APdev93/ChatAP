@@ -1,9 +1,43 @@
 const axios = require("axios");
 const { ImageGen } = require("./bing");
+const Jimp = require("jimp");
+const fs = require("fs");
+const root = process.cwd();
+
+const wm = imageBuffer => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const image = await Jimp.read(imageBuffer);
+			const watermark = await Jimp.read(
+				fs.readFileSync(`${root}/public/assets/images/wm.png`),
+			);
+
+			watermark.resize(image.bitmap.width / 10, Jimp.AUTO);
+
+			const xMargin = 40;
+			const yMargin = 40;
+			const x = xMargin;
+			const y = image.bitmap.height - watermark.bitmap.height - yMargin;
+
+			image.composite(watermark, x, y, {
+				mode: Jimp.BLEND_SOURCE_OVER,
+				opacitySource: 0.5,
+			});
+
+			const outputBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+			console.log(outputBuffer);
+			resolve(outputBuffer);
+		} catch (err) {
+			console.error("Failed to add watermark:", err);
+			reject(err);
+		}
+	});
+};
 
 const cookies = [
 	"10g0hhWnfelLm8N32MU1ATKECUTaRLBYwC-M7lfO7euODTQOGs3HStuLHtx-ShkEZHtackX5AFUGCtx2dG2iUX_It7TA5198oMkj_A4IIuTXQ-3vF8Us4Vuz8fLevtFD4LAtGygDA4k4_wG73TAtqU6sC_Oax1V9RpC0acJ4B9I4eK2Fr3q4d6Bc4gfj5kJEYhEr_UaHog56f9efTE8zCpw",
 	"1tBqBgOXDewYQsibIlviW6vbFU3FPcbfMLqetjMOQ0K9-CC0t40uynErXyBoOck1OdHpzAlmA8_kilSx-KfT8WhjPPIQkXhnzPaKM5ZkYSs9Rr2FwLM4Za3Xm6-vJjq92daNK4Ms1B3-YBHq9U_arzaeMUB4yOK8HL2NTGyWjf4KsJlhf4XteUs3iPrT2KaVyy3xAZuoTTfX4YrMyULbnHQ",
+	"1M39JTr1YlY2n5r-qNBQUCNdFuFY_QdK6qF6_m8Klq5nQSOguLI89oZiJuQfkWy3wna2CyYhUhefwoZyUwrmEcuI4SA-DC5hC29OafQXartJkLAOa3exvezfCACbqpKL2_1xRnhQr4zNXkxU94k_3YcSrCzf5HwKyR-g63_E1AgSy78c6n7cOb7LgZjIIRd0MQ_Olp9VoeEccW3c8sdriZgZWijAUUun_oOPtzUNUIHM",
 ];
 
 function getRandom(array) {
@@ -18,11 +52,20 @@ async function generateImage(prompt) {
 		let img = response.map(url => url.replace(/\.svg$/, ""));
 		console.log(img);
 		if (img) {
-			return {
-				author: "APdev",
-				success: true,
-				image: img[2],
-			};
+			let imageWithWm = await wm(img[2]);
+			if (imageWithWm) {
+				return {
+					author: "APdev",
+					success: true,
+					image: imageWithWm,
+				};
+			} else {
+				return {
+					author: "APdev",
+					success: false,
+					image: "Can't generate image, maybe the prompt isn't allowed",
+				};
+			}
 		} else {
 			return {
 				author: "APdev",
@@ -134,11 +177,13 @@ async function GPT4o(data) {
 
 			try {
 				const data = await generateImage(prompt);
+				let base64Image = data.image.toString("base64");
+				const imgSrc = `data:image/png;base64,${base64Image}`;
 				if (data.success) {
 					return {
 						status: true,
 						message: answer.msg,
-						image: data.image,
+						image: imgSrc,
 						author: "AP",
 					};
 				} else {

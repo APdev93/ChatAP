@@ -156,12 +156,8 @@ function renderMessages(messages) {
 			if (message.role === "images") {
 				const image = document.createElement("img");
 				image.src = message.content;
-				if (!image.src.startsWith("https")) {
-					errorMessage("Something went wrong, canot generate image, try again.");
-				} else {
-					image.classList.add("chat-image");
-					chatContent.appendChild(image);
-				}
+				image.classList.add("chat-image");
+				chatContent.appendChild(image);
 			} else if (message.role === "user") {
 				chatContent.innerHTML = message.content;
 			} else if (message.role !== "user") {
