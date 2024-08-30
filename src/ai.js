@@ -1,23 +1,20 @@
 const axios = require("axios");
+const { ImageGen } = require("./bing");
 
 async function generateImage(prompt) {
 	try {
-		console.log("Generating image...");
-		let url = `https://nekohime.xyz/api/ai/bingimg?text=${prompt}&apikey=apdev`; // your api
+		const bing = new ImageGen(
+			"1tBqBgOXDewYQsibIlviW6vbFU3FPcbfMLqetjMOQ0K9-CC0t40uynErXyBoOck1OdHpzAlmA8_kilSx-KfT8WhjPPIQkXhnzPaKM5ZkYSs9Rr2FwLM4Za3Xm6-vJjq92daNK4Ms1B3-YBHq9U_arzaeMUB4yOK8HL2NTGyWjf4KsJlhf4XteUs3iPrT2KaVyy3xAZuoTTfX4YrMyULbnHQ",
+		);
 
-		let response = await fetch(url);
-		let data = await response.json();
-		console.log(data);
-		let img = data.result;
-
-		let filtered = img.result.filter(item => item.startsWith("https"));
-		const randomImg = filtered[Math.floor(Math.random() * filtered.length)];
-		console.log(randomImg);
-		if (data.status) {
+		let response = await bing.get_images(prompt);
+		let img = response.map(url => url.replace(/\.svg$/, ""));
+		console.log(img);
+		if (img) {
 			return {
 				author: "APdev",
 				success: true,
-				image: randomImg,
+				image: img[2],
 			};
 		} else {
 			return {
@@ -52,7 +49,7 @@ async function gpt(data) {
 			"https://chatbot-ji1z.onrender.com/chatbot-ji1z",
 			json,
 		);
-
+		console.log(data);
 		return {
 			author: "APdev",
 			success: true,
