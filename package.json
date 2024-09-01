@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js",
+		"build": "node build.js",
 		"serve": "serve",
 		"dev": "nodemon index.js"
 	},
@@ -15,6 +16,7 @@
 		"axios": "^1.6.8",
 		"body-parser": "^1.20.2",
 		"cheerio": "^1.0.0",
+		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
 		"ejs": "^3.1.10",
 		"express": "^4.19.2",

@@ -235,7 +235,6 @@ async function sendMessage(message) {
 				last: messages,
 			};
 			await socket.emit(`chat ${callbackData.snd}`, formattedMessage); // Use the correct route
-			console.log(`Message sent to chat ${callbackData.snd}`);
 		} else {
 			console.log("Callback data is null, cannot send message");
 		}
@@ -250,7 +249,6 @@ socket.on("connect", async function () {
 	});
 	if (callbackData) {
 		socket.on(`chat ${callbackData.rec}`, async function (newMessage) {
-			console.log("Received message:", newMessage);
 			try {
 				messages.push(newMessage);
 				await renderMessages(messages);
