@@ -159,7 +159,7 @@ function renderMessages(messages) {
 				image.classList.add("chat-image");
 				chatContent.appendChild(image);
 			} else if (message.role === "user") {
-				chatContent.innerHTML = message.content;
+				chatContent.innerHTML = message.content.replace(/\n/g, "<br>");
 			} else if (message.role !== "user") {
 				if (index === messages.length - 1) {
 					let wordIndex = 0;
@@ -185,7 +185,7 @@ function renderMessages(messages) {
 								btnSend.innerHTML = `<i class="fa-solid fa-arrow-up"></i>`;
 								btnSend.disabled = false;
 							}
-							setTimeout(type, 30); // Adjust typing speed by word
+							setTimeout(type, 10); // Adjust typing speed by word
 						}
 					}
 

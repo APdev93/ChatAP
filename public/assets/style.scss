@@ -401,6 +401,8 @@ codetag {
 .chat-sender {
 	align-self: flex-end;
 	background-color: var(--right-bubble);
+	max-width: 70% !important;
+	min-width: 50px !important;
 	/* box-shadow: 0px 1.5px 2px var(--border-color); */
 	/* border-top-right-radius: 0 !important; */
 
