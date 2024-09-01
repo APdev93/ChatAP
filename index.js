@@ -26,6 +26,14 @@ const corsOptions = {
 	optionsSuccessStatus: 200,
 };
 
+app.use((req, res, next) => {
+	const userAgent = req.headers["user-agent"];
+	if (/curl|wget|PostmanRuntime|Scrapy/.test(userAgent)) {
+		return res.status(403).json({ error: "Forbidden" });
+	}
+	next();
+});
+
 app.use(cors(corsOptions));
 
 // Middleware untuk file statis
@@ -110,26 +118,57 @@ app.get("/download", async (req, res) => {
 	}
 });
 
+var currentRoute = {
+	response: "a",
+	message: "b",
+};
+
+const generateRandomRoute = () => {
+	let r = "";
+	const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
+	for (let i = 0; i < 5; i++) {
+		r += c.charAt(Math.floor(Math.random() * c.length));
+	}
+	return r;
+};
+
+const createNewRoute = () => {
+	let a = generateRandomRoute();
+	let b = generateRandomRoute();
+	currentRoute.response = a;
+	currentRoute.message = b;
+};
+
 app.post("/callback", (req, res) => {
 	if (req.body) {
-		console.log("Received callback: ", req.body);
-		res.status(200).json({ message: req.body });
+		console.log("Received callback");
+
+		res.status(200).json({
+			rec: currentRoute.response,
+			snd: currentRoute.message,
+		});
+		console.log("Generated routes:", currentRoute);
 	} else {
-		res.status(404).json({ message: false });
+		res.status(500).json({ msg: "Callback not successful" });
 	}
 });
 
 io.on("connection", sock => {
 	const clientIp = sock.handshake.address;
 	console.log(`[SOCKET] : ${clientIp} connected`);
-	sock.on("disconnect", () => {
-		console.log(`[SOCKET] : ${clientIp} disconnected`);
-	});
 
-	sock.on("chat message", async message => {
-		console.log("Not filtered: ", message.last);
-		let lastMessage = message.last.filter(msg => msg.role !== "images");
-		console.log("Filtered array: ", lastMessage);
+	const uniqueRoom = `room_${Date.now()}_${Math.random()
+		.toString(36)
+		.substring(2, 15)}`;
+	sock.join(uniqueRoom);
+
+	console.log(`Listening for chat on route: ${currentRoute.message}`);
+	console.log(`Will respond on route: ${currentRoute.response}`);
+
+	sock.on(`chat ${currentRoute.message}`, async message => {
+		console.log("Received message:", message);
+		const lastMessage = message.last.filter(msg => msg.role !== "images");
+
 		try {
 			const json = {
 				model: "gpt4o",
@@ -151,99 +190,34 @@ io.on("connection", sock => {
 			});
 
 			const responseData = await response.json();
+			console.log("API response:", responseData);
 
 			if (responseData.image) {
-				if (responseData.status) {
-					const newAMessage = {
-						role: "assistant",
-						content: responseData.message,
-					};
-					sock.emit("chat response", newAMessage);
-				}
-				const newMessage = {
+				const newImageMessage = {
 					role: "images",
 					content: responseData.image,
 				};
-				sock.emit("chat response", newMessage);
+				io.to(uniqueRoom).emit(`chat ${currentRoute.response}`, newImageMessage);
 			} else {
 				const assistantResponse = responseData.data;
 				const newMessage = {
 					role: "assistant",
 					content: assistantResponse,
 				};
-
-				sock.emit("chat response", newMessage);
+				io.to(uniqueRoom).emit(`chat ${currentRoute.response}`, newMessage);
 			}
+
+			console.log(`Message emitted to chat ${currentRoute.response}`);
 		} catch (error) {
 			console.log("Error sending message to API:", error);
 		}
 	});
-});
-/* io.on("connection", sock => {
-	const clientIp = sock.handshake.address;
-	console.log(`[SOCKET] : ${clientIp} connected`);
+
 	sock.on("disconnect", () => {
+		createNewRoute();
 		console.log(`[SOCKET] : ${clientIp} disconnected`);
 	});
-
-	sock.on("chat message", async message => {
-		const regex = /(gambarkan|imagine|picture)/i;
-		console.log(message);
-		if (regex.test(message.comming.content)) {
-			try {
-				const response = await fetch(`http://localhost:${port}/imagining`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ prompt: message.comming.content }),
-				});
-
-				const data = await response.json();
-				const newMessage = {
-					role: "images",
-					content: data.image,
-				};
-				sock.emit("chat response", newMessage);
-			} catch (error) {
-				console.error("Error posting image:", error);
-			}
-		} else {
-			//allmsg.push(message);
-			try {
-				const json = {
-					model: "gpt",
-					messages: [
-						...message.last,
-						{
-							role: "user",
-							content: message.comming.content,
-						},
-					],
-				};
-
-				const response = await fetch(`http://localhost:${port}/completion`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(json),
-				});
-
-				const responseData = await response.json();
-				const assistantResponse = responseData.data;
-				const newMessage = {
-					role: "assistant",
-					content: assistantResponse,
-				};
-
-				sock.emit("chat response", newMessage);
-			} catch (error) {
-				console.log("Error sending message to API:", error);
-			}
-		}
-	});
-}); */
+});
 
 server.listen(port, () => {
 	console.log("[SERVER] : Server running, on port: ", port);

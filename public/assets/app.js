@@ -133,10 +133,6 @@ function processMessage() {
 	return chatBubble;
 }
 
-/**
- * Render message to frontend
- * @param {object} messages lastMessage|| userMessage || assistantMessage
- */
 function renderMessages(messages) {
 	try {
 		chatContainer.innerHTML = "";
@@ -203,48 +199,67 @@ function renderMessages(messages) {
 }
 
 async function callback(msg) {
-	let response = await fetch("/callback", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({ msg }),
-	});
-	if (!response.ok) {
-		console.log("cannot send callback");
+	try {
+		console.log("trying callback...");
+		let response = await fetch("/callback", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ msg }),
+		});
+
+		if (!response.ok) {
+			console.log("Cannot send callback");
+			return null;
+		}
+
+		let data = await response.json();
+		return data;
+	} catch (e) {
+		console.warn(e);
+		return null;
 	}
-	let data = response.json();
-	console.log(data);
 }
-/**
- * sendMessage to ai
- * @param {object} message new message from user
- */
+
 async function sendMessage(message) {
 	const loading = await processMessage();
 	try {
 		window.location.href = "#chat";
-		message = {
-			comming: message,
-			last: messages,
-		};
-		await socket.emit("chat message", message);
-		await callback(message);
+		const callbackData = await callback({
+			msg: "KuYTgKONk816_UFvJDwJKoFsWhHBXVNiRwAyKk==",
+		});
+		if (callbackData) {
+			const formattedMessage = {
+				comming: message,
+				last: messages,
+			};
+			await socket.emit(`chat ${callbackData.snd}`, formattedMessage); // Use the correct route
+			console.log(`Message sent to chat ${callbackData.snd}`);
+		} else {
+			console.log("Callback data is null, cannot send message");
+		}
 	} catch (err) {
 		errorMessage(err);
 	}
 }
-/**
- * get response from ai
- * @param {Object} newMessage new message from assistant
- */
-socket.on("chat response", async function (newMessage) {
-	try {
-		console.log(messages);
-		messages.push(newMessage);
-		await renderMessages(messages);
-		window.location.href = "#chat";
-	} catch (err) {
-		errorMessage(err);
+
+socket.on("connect", async function () {
+	const callbackData = await callback({
+		msg: "Kh816hhfaDshbJDwJKoFsWhHBXVNanajNvyio==",
+	});
+	if (callbackData) {
+		socket.on(`chat ${callbackData.rec}`, async function (newMessage) {
+			console.log("Received message:", newMessage);
+			try {
+				messages.push(newMessage);
+				await renderMessages(messages);
+				window.location.href = "#chat";
+			} catch (err) {
+				errorMessage(err);
+			}
+		});
+	} else {
+		console.log("Callback data is null, cannot listen for messages");
 	}
 });
