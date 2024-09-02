@@ -47,6 +47,26 @@ app.get("/", (req, res) => {
 	}
 });
 
+app.post("/check_prompt", async (req, res) => {
+	try {
+		const { prompt } = req.body;
+
+		if (typeof prompt !== "string" || prompt.trim() === "") {
+			return res.status(400).json({ error: "Invalid prompt data", cmd: null });
+		}
+
+		const checkedData = await ai.checkPrompt(prompt);
+		if (checkedData) {
+			res.status(200).json({ cmd: checkedData.cmd });
+		} else {
+			res.status(500).json({ error: "Failed to process prompt", cmd: null });
+		}
+	} catch (error) {
+		console.error("Error processing /check_prompt:", error);
+		res.status(500).json({ error: "Internal server error", cmd: null });
+	}
+});
+
 app.post("/completion", async (req, res) => {
 	const clientIp =
 		req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -168,7 +188,7 @@ io.on("connection", sock => {
 	sock.on(`chat ${currentRoute.message}`, async message => {
 		console.log("Received message:", message);
 		const lastMessage = message.last.filter(msg => msg.role !== "images");
-
+		console.log(message);
 		try {
 			const json = {
 				model: "gpt4o",
@@ -176,7 +196,7 @@ io.on("connection", sock => {
 					...lastMessage,
 					{
 						role: "user",
-						content: message.comming.content,
+						content: message.coming.content,
 					},
 				],
 			};
@@ -190,14 +210,18 @@ io.on("connection", sock => {
 			});
 
 			const responseData = await response.json();
-			console.log("API response:", responseData);
 
 			if (responseData.image) {
-				const newImageMessage = {
+				let newImageMessage = {
 					role: "images",
 					content: responseData.image,
 				};
 				io.to(uniqueRoom).emit(`chat ${currentRoute.response}`, newImageMessage);
+				let captionImage = {
+					role: "assistant",
+					content: responseData.message,
+				};
+				io.to(uniqueRoom).emit(`chat ${currentRoute.response}`, captionImage);
 			} else {
 				const assistantResponse = responseData.data;
 				const newMessage = {

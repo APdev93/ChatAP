@@ -43,6 +43,36 @@ strong {
 	}
 }
 
+.loading-img {
+	font-size: 15px;
+	text-align: center;
+	color: #888;
+	span {
+		display: inline-block;
+		margin: 0 -0.05em;
+	}
+}
+
+.loading01 {
+	span {
+		animation: loading01 1.4s infinite alternate;
+
+		@for $i from 0 through 12 {
+			&:nth-child(#{$i + 1}) {
+				animation-delay: #{$i * 0.1}s;
+			}
+		}
+	}
+}
+@keyframes loading01 {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
 .loading {
 	width: 25px;
 	height: 25px;
@@ -53,7 +83,6 @@ strong {
 	box-sizing: border-box;
 	animation: rotation 1s linear infinite;
 }
-
 @keyframes rotation {
 	0% {
 		transform: rotate(0deg);
@@ -62,7 +91,6 @@ strong {
 		transform: rotate(360deg);
 	}
 }
-
 .loader {
 	width: 25px;
 	aspect-ratio: 4;

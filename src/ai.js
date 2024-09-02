@@ -141,18 +141,89 @@ const jsonExtractor = text => {
 	}
 };
 
+async function checkPrompt(prompt) {
+	try {
+		const messages = [
+			{
+				role: "system",
+				content: `Ini adalah command check, jika user menyuruh untuk pembuatan gambar, logo dan sejenisnya, maka hasilkan respon json seperti ini:
+				{
+				    "cmd":"imaging",
+				    "cfg":null,
+				    "msg": null,
+				},
+				
+				HASILKAN RESPON DI ATAS HANYA KETIKA USER MEMINTA PEMBUATAN GAMBAR/LOGO, DAN SEJENISNYA\n
+				Jika tidak, maka hasilkan respon json saja seperti ini:
+				
+			    {
+				    "cmd":"text_completion",
+				    "cfg":null,
+				    "msg": null,
+				},
+				\n
+				
+				HASILKAN HANYA RESPON JSON Seperti di atas, 
+				`,
+			},
+			{
+				role: "user",
+				content: `${prompt}`,
+			},
+		];
+
+		const response = await axios.post(
+			"https://chatbot-ji1z.onrender.com/chatbot-ji1z",
+			{ messages },
+			{
+				headers: {
+					Accept: "text/event-stream",
+					"Content-Type": "application/json",
+				},
+			},
+		);
+
+		if (response.data) {
+			const checked = await jsonExtractor(
+				response.data.choices[0].message.content,
+			);
+
+			if (checked.cmd === "imaging") {
+				return {
+					cmd: "imaging",
+					cfg: null,
+					msg: null,
+				};
+			} else {
+				return {
+					cmd: "text_completion",
+					cfg: null,
+					msg: null,
+				};
+			}
+		} else {
+			// Jika response tidak memiliki struktur yang diharapkan
+			throw new Error("Unexpected response structure");
+		}
+	} catch (e) {
+		// Menangani semua error di sini
+		console.error("Error in checkPrompt:", e.message || e);
+		throw e;
+	}
+}
+
 async function GPT4o(data) {
 	try {
 		const messages = [
 			{
 				role: "system",
-				content: `This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n If the prompt indicates to create an image, then return a response like this:
+				content: `This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n you can generate images, If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
 				    "cfg": {
 				        "prompt":"prompt entered by the user"
 				      },
-				    "msg": "$pesan_yang_cocok_dari_assistant"
+				    "msg": "$prompt_gambar_yang_di_hasilkan_dari_ai,dan penjelasan gambar"
 				} . Jika tidak, respon seperti biasanya`,
 			},
 			...data,
@@ -201,4 +272,4 @@ async function GPT4o(data) {
 	}
 }
 
-module.exports = { gpt, generateImage, GPT4o };
+module.exports = { checkPrompt, gpt, generateImage, GPT4o };
