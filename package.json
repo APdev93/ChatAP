@@ -1,0 +1,36 @@
+{
+	"name": "ChatAP",
+	"version": "1.5",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"build": "node build.js",
+		"serve": "serve",
+		"dev": "nodemon index.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^1.6.8",
+		"body-parser": "^1.20.2",
+		"cheerio": "^1.0.0",
+		"child_process": "^1.0.2",
+		"cors": "^2.8.5",
+		"ejs": "^3.1.10",
+		"express": "^4.19.2",
+		"groq-sdk": "^0.3.3",
+		"http": "^0.0.1-security",
+		"jimp": "^0.22.12",
+		"moment-timezone": "^0.5.45",
+		"path": "^0.12.7",
+		"serve": "^14.2.3",
+		"socket.io": "^4.7.5",
+		"vercel": "^34.2.0",
+		"ws": "^8.18.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.0"
+	}
+}
