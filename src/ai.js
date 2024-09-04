@@ -202,11 +202,10 @@ async function checkPrompt(prompt) {
 				};
 			}
 		} else {
-			// Jika response tidak memiliki struktur yang diharapkan
-			throw new Error("Unexpected response structure");
+	throw new Error("Unexpected response structure");
 		}
 	} catch (e) {
-		// Menangani semua error di sini
+
 		console.error("Error in checkPrompt:", e.message || e);
 		throw e;
 	}
