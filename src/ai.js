@@ -293,7 +293,7 @@ async function GPT4o(data) {
 				Hasil pencarian: ${searchResult}\n
 				Jika di suruh menampilkan search result, 
 				Gunakan format "list. Judul berita/snippet berita[[nomer_link]](link_berita) atau menggunakan judul[[judul_link]](link)
-				MUNCULKAN HASIL PENCARIAN PROMPT JIKA USER MEMINTA NYA;\n\n
+				MUNCULKAN HASIL PENCARIAN PROMPT JIKA USER MEMINTA PENCARIAN MELALUI WEB, ATAU KENALI PROMPT, APAKAH ITU MENYURUH PENCARIAN DARI WEB ATAU TIDAK, JIKA USER TIDAK MEMINTA PENCARIAN DARI WEB, MAKA CARIKAN DARI DIRI ANDA SENDIRI;\n\n
 				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n you can generate images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
