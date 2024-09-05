@@ -32,7 +32,6 @@ $dark-bg-quote: #3d40475d;
 /* HTML: <div class="loader"></div> */
 /* HTML: <div class="loader"></div> */
 
-
 .loading-img {
 	font-size: 15px;
 	text-align: center;
@@ -174,12 +173,14 @@ nav {
 	height: 65px;
 	z-index: 1;
 	color: var(--text-color);
+	border-bottom: 1px solid var(--border-color);
 
 	img {
 		width: 40px;
 		margin-right: auto;
 		margin-left: 10px;
-		border-radius: 50px;
+		-webkit-filter: drop-shadow(2px 1px 2px var(--border-color));
+		filter: drop-shadow(2px 1px 2px var(--border-color));
 	}
 }
 
