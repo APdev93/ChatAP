@@ -2,7 +2,46 @@ const axios = require("axios");
 const { ImageGen } = require("./bing");
 const Jimp = require("jimp");
 const fs = require("fs");
+const googleIt = require("google-it");
 const root = process.cwd();
+const now = new Date();
+
+const day = now.getDate();
+const month = now.getMonth() + 1;
+const year = now.getFullYear();
+const hours = now.getHours().toString().padStart(2, "0");
+const minutes = now.getMinutes().toString().padStart(2, "0");
+const seconds = now.getSeconds().toString().padStart(2, "0");
+const dayOfWeek = now.getDay();
+
+const daysOfWeek = [
+	"Minggu",
+	"Senin",
+	"Selasa",
+	"Rabu",
+	"Kamis",
+	"Jumat",
+	"Sabtu",
+];
+const monthsOfYear = [
+	"Januari",
+	"Februari",
+	"Maret",
+	"April",
+	"Mei",
+	"Juni",
+	"Juli",
+	"Agustus",
+	"September",
+	"Oktober",
+	"November",
+	"Desember",
+];
+
+const dayName = daysOfWeek[dayOfWeek];
+const monthName = monthsOfYear[month - 1];
+
+const formattedDateTime = `Jam: ${hours}:${minutes}, Hari:${dayName}, tanggal:${day} bulan:${monthName} tahun:${year}`;
 
 const wm = imageBuffer => {
 	return new Promise(async (resolve, reject) => {
@@ -42,7 +81,40 @@ const cookies = [
 
 function getRandom(array) {
 	const randomIndex = Math.floor(Math.random() * array.length);
+
 	return array[randomIndex];
+}
+
+async function searchWeb(query) {
+	try {
+		const response = await fetch(
+			`https://api.yanzbotz.live/api/cari/google-search?query=${encodeURIComponent(
+				query,
+			)}`,
+		);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		let text = "";
+		data.result.forEach((result, index) => {
+			text += `Title: ${result.title}\n`;
+			text += `link: [[${index + 1}]](${result.link})\n`;
+			text += `Snippet: ${result.snippet}\n`;
+			text += "\n";
+		});
+		return text;
+
+		return text;
+	} catch (error) {
+		console.error(
+			`Error: ${error.toString()}. Report this error to Developer(YanzBotz)`,
+		);
+		return { error: error.message };
+	}
 }
 
 async function generateImage(prompt) {
@@ -202,10 +274,9 @@ async function checkPrompt(prompt) {
 				};
 			}
 		} else {
-	throw new Error("Unexpected response structure");
+			throw new Error("Unexpected response structure");
 		}
 	} catch (e) {
-
 		console.error("Error in checkPrompt:", e.message || e);
 		throw e;
 	}
@@ -213,10 +284,17 @@ async function checkPrompt(prompt) {
 
 async function GPT4o(data) {
 	try {
+		let searchResult = await searchWeb(data[data.length - 1].content);
+		console.log("Search results: ", searchResult);
 		const messages = [
 			{
 				role: "system",
-				content: `This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n you can generate images, If the prompt indicates to create an image, then return a response like this:
+				content: `Sekarang: ${formattedDateTime}\n
+				Hasil pencarian: ${searchResult}\n
+				Jika di suruh menampilkan search result, 
+				Gunakan format "list. Judul berita/snippet berita[[nomer_link]](link_berita) atau menggunakan judul[[judul_link]](link)
+				MUNCULKAN HASIL PENCARIAN PROMPT JIKA USER MEMINTA NYA;\n\n
+				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n you can generate images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
 				    "cfg": {
