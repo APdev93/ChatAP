@@ -162,11 +162,59 @@ const createNewRoute = () => {
 app.post("/callback", (req, res) => {
 	if (req.body) {
 		console.log("Received callback");
+		console.log(req.body);
 
-		res.status(200).json({
-			rec: currentRoute.response,
-			snd: currentRoute.message,
-		});
+		// ? Cek ada body msg ga
+		if (!req.body.msg.msg)
+			return res.status(500).json({ msg: "Error From Server" });
+
+		// ? Cek ada act header ga
+		if (!req.headers["x-action"])
+			return res.status(500).json({ msg: "Error From Server" });
+		const act = req.headers["x-action"];
+		const msg = req.body?.msg?.msg || "";
+		console.log(`Action : ${act}`);
+		console.log(`Message : ${Buffer.from(msg, "base64").toString("utf-8")}`);
+
+		// ? Kalo act revalidate
+		if (act === "revalidate") {
+			// ? Cek kalo msg itu sama ga
+			if (
+				Buffer.from(msg, "base64").toString("utf-8") !==
+				"Kh816hhfaDshbJDwJKoFsWhHBXVNanajNvyio=="
+			)
+				return res.status(500).json({
+					msg: "Error From Server",
+				});
+
+			res.status(200).json({
+				rec: currentRoute.response,
+				snd: currentRoute.message,
+			});
+		} else {
+			// ? Cek key buat descrypt uuid base64
+			const key = req.headers["x-id"] || "";
+			if (!key)
+				return res.status(500).json({
+					msg: "Error From Server",
+				});
+
+			// ? Cek bener ga uuidnya 5 kalo displit -
+			if (
+				Buffer.from(msg, "base64")
+					.toString("utf-8")
+					.replace(new RegExp(key, "gi"), "-")
+					.split("-").length !== 5
+			)
+				return res.status(500).json({
+					msg: "Error From Server",
+				});
+
+			res.status(200).json({
+				rec: currentRoute.response,
+				snd: currentRoute.message,
+			});
+		}
 		console.log("Generated routes:", currentRoute);
 	} else {
 		res.status(500).json({ msg: "Callback not successful" });
@@ -182,13 +230,21 @@ io.on("connection", sock => {
 		.substring(2, 15)}`;
 	sock.join(uniqueRoom);
 
+	console.log(`UniqueRoom : ${uniqueRoom}`);
 	console.log(`Listening for chat on route: ${currentRoute.message}`);
 	console.log(`Will respond on route: ${currentRoute.response}`);
 
 	sock.on(`chat ${currentRoute.message}`, async message => {
 		console.log("Received message:", message);
 		const lastMessage = message.last.filter(msg => msg.role !== "images");
-		console.log(message);
+		// ? Cek misal sessionHash itu ga sama kyk current route trus ngeemit error
+		if (
+			Buffer.from(message.sessionHash, "base64").toString("utf-8") !==
+			currentRoute.message
+		)
+			return io
+				.to(uniqueRoom)
+				.emit(`chat ${currentRoute.response}`, { error: "Forbidden" });
 		try {
 			const json = {
 				model: "gpt4o",
@@ -201,6 +257,7 @@ io.on("connection", sock => {
 				],
 			};
 
+			// ? Check ai
 			const response = await fetch(`http://localhost:${port}/completion`, {
 				method: "POST",
 				headers: {

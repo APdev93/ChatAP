@@ -285,7 +285,7 @@ async function checkPrompt(prompt) {
 async function GPT4o(data) {
 	try {
 		let searchResult = await searchWeb(data[data.length - 1].content);
-		console.log("Search results: ", searchResult);
+		
 		const messages = [
 			{
 				role: "system",
