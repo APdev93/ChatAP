@@ -2,7 +2,6 @@ const axios = require("axios");
 const { ImageGen } = require("./bing");
 const Jimp = require("jimp");
 const fs = require("fs");
-const googleIt = require("google-it");
 const root = process.cwd();
 const now = new Date();
 
@@ -285,7 +284,7 @@ async function checkPrompt(prompt) {
 async function GPT4o(data) {
 	try {
 		let searchResult = await searchWeb(data[data.length - 1].content);
-		
+console.log("Search results: ", searchResult)
 		const messages = [
 			{
 				role: "system",
@@ -303,7 +302,7 @@ For example:
 
 Make sure the numbering is sequential, and URLs are correctly placed at the end of each reference.\n
 				SHOW SEARCH RESULTS PROMPT IF USER REQUESTS SEARCH VIA WEB, OR RECOGNIZE PROMPT, WHETHER IT REQUESTS SEARCH FROM WEB OR NOT, IF USER DOES NOT REQUEST SEARCH FROM WEB, THEN SEARCH AT YOUR MODEL;\n\n
-				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o.\n you can generate images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
+				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o. Data updated in 2024, up to date\n you can generate images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
 				    "cfg": {
