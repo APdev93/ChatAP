@@ -3,9 +3,9 @@
 /node_modules/
 package-lock.json
 /public/prototype.html
-# /public/assets/app.min.js
+/public/assets/app.min.js
 /public/assets/app.js.map
 
 # deploy branch
 
-/public/assets/app.js
+#/public/assets/app.js

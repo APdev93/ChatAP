@@ -3,6 +3,30 @@
 	const socket = io();
 	let messages = [];
 
+	let copyCount = 0;
+	
+	function copyCode(e) {
+				const t = document.getElementById(e).innerText;
+				window.alert("Copied ✓"), navigator.clipboard.writeText(t);
+			}
+
+	setInterval(() => {
+		const copy = document.getElementsByClassName("copyBtn");
+		if (copyCount < copy.length) {
+			for (let cop of copy) {
+				const p = cop.cloneNode(true);
+				const n = cop.getAttribute("data-id");
+				console.log(n);
+				p.addEventListener("click", () => {
+					copyCode(n);
+				});
+				cop.parentNode.replaceChild(p, cop);
+			}
+
+			copyCount++;
+		}
+	}, 2500);
+
 	document
 		.getElementById("message-form")
 		.addEventListener("submit", async function (event) {
