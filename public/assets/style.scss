@@ -29,8 +29,17 @@ $dark-bg-quote: #3d40475d;
 	--bg-quote: #{$light-bg-quote};
 }
 
-/* HTML: <div class="loader"></div> */
-/* HTML: <div class="loader"></div> */
+.input-image {
+	label {
+		color: white;
+		cursor: pointer;
+		font-size: 25px;
+	}
+
+	#imageInput {
+		display: none;
+	}
+}
 
 .loading-img {
 	font-size: 15px;
@@ -166,7 +175,7 @@ nav {
 	left: 0;
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
+	justify-content: space-between;
 	align-items: center;
 	background: transparent;
 	backdrop-filter: blur(10px);
@@ -174,13 +183,28 @@ nav {
 	z-index: 1;
 	color: var(--text-color);
 	border-bottom: 1px solid var(--border-color);
-
+	padding-left: 10px;
+	padding-right: 10px;
 	img {
 		width: 40px;
-		margin-right: auto;
-		margin-left: 10px;
 		-webkit-filter: drop-shadow(2px 1px 2px var(--border-color));
 		filter: drop-shadow(2px 1px 2px var(--border-color));
+	}
+}
+
+.menu-btn {
+	height: 40px;
+	width: 40px;
+	border-radius: 5px;
+	padding: 5px;
+	border: 1px solid var(--border-color);
+	font-size: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: all 0.3s ease-in-out;
+	&:hover {
+		color: #cfcfcf;
 	}
 }
 
@@ -311,9 +335,11 @@ button {
 			min-height: 45px !important;
 			max-height: 100px !important;
 			border-radius: 50px;
-			width: 84%;
+			width: 80%;
 			padding: 10px;
 			padding-top: 11px;
+			padding-left: 20px;
+			padding-right: 20px;
 			background-color: var(--input-color);
 			text-align: left;
 			box-sizing: border-box;
@@ -348,7 +374,7 @@ codetag {
 
 .logo {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	justify-content: center;
 	align-items: center;
 	gap: 3px;
@@ -424,6 +450,15 @@ codetag {
 	min-width: 50px !important;
 	/* box-shadow: 0px 1.5px 2px var(--border-color); */
 	/* border-top-right-radius: 0 !important; */
+
+	.chat-content {
+		img {
+			width: 300px;
+			height: 200px;
+			margin-bottom: 8px;
+			object-fit: cover;
+		}
+	}
 
 	&::before {
 		/* border-top-color: var(--right-bubble); */

@@ -4,11 +4,11 @@
 	let messages = [];
 
 	let copyCount = 0;
-	
+
 	function copyCode(e) {
-				const t = document.getElementById(e).innerText;
-				window.alert("Copied ✓"), navigator.clipboard.writeText(t);
-			}
+		const t = document.getElementById(e).innerText;
+		window.alert("Copied ✓"), navigator.clipboard.writeText(t);
+	}
 
 	setInterval(() => {
 		const copy = document.getElementsByClassName("copyBtn");
@@ -32,23 +32,55 @@
 		.addEventListener("submit", async function (event) {
 			event.preventDefault();
 			window.location.href = "#chat";
+
+			const textarea = document.getElementById("message"); // pastikan textarea sudah didefinisikan
 			textarea.style.height = "45px";
-			const inputMessage = document.getElementById("message").value;
+
+			const inputMessage = textarea.value;
+			const imageInput = document.getElementById("imageInput").files[0]; // Mengambil file input, bukan value
 			const currentTime = new Date().toLocaleTimeString();
 			let btnSend = document.getElementById("btnSend");
+			let newMessage;
 
-			const newMessage = {
-				role: "user",
-				content: inputMessage,
-			};
-			messages.push(newMessage);
-			renderMessages(messages);
-			document.getElementById("message").value = "";
-			btnSend.innerHTML = `<span class="loading"></span>`;
-			btnSend.setAttribute("disabled", "true");
-			await sendMessage(inputMessage, newMessage);
+			if (imageInput) {
+				const reader = new FileReader();
+				reader.onloadend = async function () {
+					const base64String = reader.result
+						.replace("data:", "")
+						.replace(/^.+,/, "");
+
+					newMessage = {
+						role: "user",
+						content: {
+							image: base64String,
+							text: inputMessage,
+						},
+					};
+
+					messages.push(newMessage);
+					renderMessages(messages);
+					textarea.value = "";
+					document.getElementById("imageInput").value = "";
+					btnSend.innerHTML = `<span class="loading"></span>`;
+					btnSend.setAttribute("disabled", "true");
+					await sendMessage(inputMessage, newMessage);
+				};
+				reader.readAsDataURL(imageInput);
+			} else {
+				newMessage = {
+					role: "user",
+					content: inputMessage,
+				};
+
+				messages.push(newMessage);
+				renderMessages(messages);
+				textarea.value = "";
+				document.getElementById("imageInput").value = "";
+				btnSend.innerHTML = `<span class="loading"></span>`;
+				btnSend.setAttribute("disabled", "true");
+				await sendMessage(inputMessage, newMessage);
+			}
 		});
-
 	const applyPreferredTheme = () => {
 		const prefersDarkScheme = window.matchMedia(
 			"(prefers-color-scheme: dark)",
@@ -236,10 +268,23 @@
 					chatContent.appendChild(image);
 					getLinkInfo();
 				} else if (message.role === "user") {
-					chatContent.innerHTML = message.content
-						.replace(/\n/g, "<br>")
-						.replace(/\t/g, "&nbsp;&nbsp;&nbsp;nbsp;");
-					getLinkInfo();
+					console.log(message);
+					if (!message.content.image) {
+						console.log("message without image");
+						chatContent.innerHTML = message.content
+							.replace(/\n/g, "<br>")
+							.replace(/\t/g, "&nbsp;&nbsp;&nbsp;nbsp;");
+						getLinkInfo();
+					} else {
+						console.log("message with image");
+						const image = document.createElement("img");
+						image.src = `data:image/png;base64,${message.content.image}`;
+						chatContent.appendChild(image);
+						chatContent.innerHTML += message.content.text
+							.replace(/\n/g, "<br>")
+							.replace(/\t/g, "&nbsp;&nbsp;&nbsp;nbsp;");
+						getLinkInfo();
+					}
 				} else if (message.role !== "user") {
 					getLinkInfo();
 					if (index === messages.length - 1) {
@@ -336,6 +381,19 @@
 			);
 
 			if (callbackData) {
+				if (message.content.image) {
+				    const compressedBase64 = pako.deflate(message.content.image, {
+					to: "string",
+				});
+				message = {
+					role: "user",
+					content: {
+						image: compressedBase64,
+						text: message.content.text,
+					},
+				};
+				console.log("Compresed data: ", message);
+				}
 				const formattedMessage = {
 					coming: message,
 					last: messageLast,

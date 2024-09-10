@@ -68,6 +68,12 @@
 
 		<div class="message-form">
 			<form id="message-form">
+				<div class="input-image">
+					<input type="file" name="image" id="imageInput" />
+					<label for="imageInput" class="imgUpload"
+						><i class="fa-solid fa-image"></i>
+					</label>
+				</div>
 				<textarea
 					id="message"
 					name="message"
@@ -78,10 +84,10 @@
 				</button>
 			</form>
 		</div>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script
-			src="/assets/app.min.js"
+			src="/assets/app.js"
 			type="text/javascript"
 			charset="utf-8"></script>
 		<script>

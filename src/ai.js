@@ -2,6 +2,11 @@ const axios = require("axios");
 const { ImageGen } = require("./bing");
 const Jimp = require("jimp");
 const fs = require("fs");
+const geminiKey = "AIzaSyDDhOuxa13exugJQcMQsiWUacOJq2DGSL4";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(geminiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 const root = process.cwd();
 const now = new Date();
 
@@ -282,13 +287,42 @@ async function checkPrompt(prompt) {
 }
 
 async function GPT4o(data) {
-	try {
-		let searchResult = await searchWeb(data[data.length - 1].content);
-console.log("Search results: ", searchResult)
-		const messages = [
-			{
-				role: "system",
-				content: `Sekarang: ${formattedDateTime}\n
+	if (data[data.length - 1].content.image) {
+		try {
+			console.log("Data with image");
+			const prompt = data[data.length - 1].content.text;
+			const image = {
+				inlineData: {
+					data: data[data.length - 1].content.image,
+					mimeType: "image/png",
+				},
+			};
+
+			const result = await model.generateContent([prompt, image]);
+			console.log(result.response.text());
+			return { data: result.response.text(), author: "AP" };
+		} catch (e) {
+			console.log("Error when reading image");
+		}
+	} else {
+		try {
+			console.log(data);
+			/*data = data[data.length - 1].map(item => {
+			if (typeof item.content === "object") {
+				return {
+					role: item.role,
+					content: item.content.text || null,
+				};
+			}
+			return item;
+	
+		});*/
+			let searchResult = await searchWeb(data[data.length - 1].content);
+			console.log("Search results: ", searchResult);
+			const messages = [
+				{
+					role: "system",
+					content: `Sekarang: ${formattedDateTime}\n
 				Hasil pencarian: ${searchResult}\n
 When providing answers that include URLs or references, ensure the references are formatted using sequential numbering with URLs as follows: 
 - Each reference should be numbered starting from 1.
@@ -310,50 +344,51 @@ Make sure the numbering is sequential, and URLs are correctly placed at the end 
 				      },
 				    "msg": "$prompt_image_generated_from_ai,and image description"
 				} . Otherwise, the response is as usual.`,
-			},
-			...data,
-		];
-
-		const response = await axios.post(
-			"https://chatbot-ji1z.onrender.com/chatbot-ji1z",
-			{ messages },
-			{
-				headers: {
-					Accept: "text/event-stream",
-					"Content-Type": "application/json",
 				},
-			},
-		);
+				...data,
+			];
+			console.log(data);
+			const response = await axios.post(
+				"https://chatbot-ji1z.onrender.com/chatbot-ji1z",
+				{ messages },
+				{
+					headers: {
+						Accept: "text/event-stream",
+						"Content-Type": "application/json",
+					},
+				},
+			);
 
-		let answer = await jsonExtractor(response.data.choices[0].message.content);
-		console.log(answer);
-		if (answer.cmd == "bingimg") {
-			const prompt = answer.cfg.prompt;
-			const message = answer.msg || "Okay, I'm creating an image for you!";
+			let answer = await jsonExtractor(response.data.choices[0].message.content);
+			console.log(answer);
+			if (answer.cmd == "bingimg") {
+				const prompt = answer.cfg.prompt;
+				const message = answer.msg || "Okay, I'm creating an image for you!";
 
-			try {
-				const data = await generateImage(prompt);
-				let base64Image = data.image.toString("base64");
-				const imgSrc = `data:image/png;base64,${base64Image}`;
-				if (data.success) {
-					return {
-						status: true,
-						message: answer.msg,
-						image: imgSrc,
-						author: "AP",
-					};
-				} else {
+				try {
+					const data = await generateImage(prompt);
+					let base64Image = data.image.toString("base64");
+					const imgSrc = `data:image/png;base64,${base64Image}`;
+					if (data.success) {
+						return {
+							status: true,
+							message: answer.msg,
+							image: imgSrc,
+							author: "AP",
+						};
+					} else {
+						return { status: false, image: null, author: "AP" };
+					}
+				} catch (error) {
+					console.error("Um, it looks like something went wrong.", error);
 					return { status: false, image: null, author: "AP" };
 				}
-			} catch (error) {
-				console.error("Um, it looks like something went wrong.", error);
-				return { status: false, image: null, author: "AP" };
+			} else {
+				return { data: answer.msg, author: "AP" };
 			}
-		} else {
-			return { data: answer.msg, author: "AP" };
+		} catch (e) {
+			throw e;
 		}
-	} catch (e) {
-		throw e;
 	}
 }
 

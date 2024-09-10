@@ -5,6 +5,7 @@ const path = require("path");
 const socketIo = require("socket.io");
 const ejs = require("ejs");
 const http = require("http");
+const pako = require("pako");
 
 const bodyParser = require("body-parser");
 
@@ -18,8 +19,8 @@ const io = socketIo(server);
 app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "20mb" }));
+app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 
 const corsOptions = {
 	origin: "https://ai.apdev.my.id",
@@ -236,7 +237,50 @@ io.on("connection", sock => {
 
 	sock.on(`chat ${currentRoute.message}`, async message => {
 		console.log("Received message:", message);
+		if (message.coming.content.image) {
+			const decompressedImage = pako.inflate(message.coming.content.image, {
+				to: "string",
+			});
+			message = {
+				coming: {
+					role: "user",
+					content: {
+						image: decompressedImage,
+						text: message.coming.content.text,
+					},
+				},
+				last: message.last.map(item => {
+					if (typeof item.content === "object") {
+						return {
+							role: item.role,
+							content: item.content.text || null,
+						};
+					}
+					return item;
+				}),
+				sessionHash: message.sessionHash,
+			};
+		} else {
+			message = {
+				coming: {
+					role: "user",
+					content: message.coming.content,
+				},
+				last: message.last.map(item => {
+					if (typeof item.content === "object") {
+						return {
+							role: item.role,
+							content: item.content.text || null,
+						};
+					}
+					return item;
+				}),
+				sessionHash: message.sessionHash,
+			};
+		}
+		
 		const lastMessage = message.last.filter(msg => msg.role !== "images");
+
 		// ? Cek misal sessionHash itu ga sama kyk current route trus ngeemit error
 		if (
 			Buffer.from(message.sessionHash, "base64").toString("utf-8") !==
