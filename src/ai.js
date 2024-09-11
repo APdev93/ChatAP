@@ -104,10 +104,10 @@ async function searchWeb(query) {
 		const data = await response.json();
 
 		let text = "";
-		data.result.forEach((result, index) => {
+		data.result.results.forEach((result, index) => {
 			text += `Title: ${result.title}\n`;
-			text += `link: [[${index + 1}]](${result.link})\n`;
-			text += `Snippet: ${result.snippet}\n`;
+			text += `link: [[${index + 1}]](${result.url})\n`;
+			text += `description: ${result.description}\n`;
 			text += "\n";
 		});
 		return text;
@@ -290,7 +290,9 @@ async function GPT4o(data) {
 	if (data[data.length - 1].content.image) {
 		try {
 			console.log("Data with image");
-			const prompt = data[data.length - 1].content.text;
+			const prompt =
+				"Jawab dan sertakan markdown it, ini prompt saya: " +
+				data[data.length - 1].content.text;
 			const image = {
 				inlineData: {
 					data: data[data.length - 1].content.image,
@@ -307,16 +309,6 @@ async function GPT4o(data) {
 	} else {
 		try {
 			console.log(data);
-			/*data = data[data.length - 1].map(item => {
-			if (typeof item.content === "object") {
-				return {
-					role: item.role,
-					content: item.content.text || null,
-				};
-			}
-			return item;
-	
-		});*/
 			let searchResult = await searchWeb(data[data.length - 1].content);
 			console.log("Search results: ", searchResult);
 			const messages = [
@@ -336,7 +328,7 @@ For example:
 
 Make sure the numbering is sequential, and URLs are correctly placed at the end of each reference.\n
 				SHOW SEARCH RESULTS PROMPT IF USER REQUESTS SEARCH VIA WEB, OR RECOGNIZE PROMPT, WHETHER IT REQUESTS SEARCH FROM WEB OR NOT, IF USER DOES NOT REQUEST SEARCH FROM WEB, THEN SEARCH AT YOUR MODEL;\n\n
-				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o. Data updated in 2024, up to date\n you can generate images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
+				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o. Data updated in 2024, up to date\n you can generate images, you can read or interact with the images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
 				{
 				    "cmd":"bingimg",
 				    "cfg": {

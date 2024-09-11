@@ -26,7 +26,24 @@
 			copyCount++;
 		}
 	}, 2500);
+	const MAX_FILE_SIZE = 50 * 1024;
+	const fileInput = document.getElementById("imageInput");
 
+	fileInput.addEventListener("change", function () {
+		const file = fileInput.files[0];
+		if (file) {
+			if (file.size > MAX_FILE_SIZE) {
+				fileInput.value = "";
+				document.getElementById("top").style.display = "none";
+				alert("File terlalu besar! Maksimal ukuran file adalah 50KB.");
+			}
+		}
+	});
+
+	const menuBtn = document.getElementById("menuBtn");
+	menuBtn.addEventListener("click", () => {
+		alert("Fitur ini belum tersedia untuk anda!");
+	});
 	document
 		.getElementById("message-form")
 		.addEventListener("submit", async function (event) {
@@ -61,6 +78,7 @@
 					renderMessages(messages);
 					textarea.value = "";
 					document.getElementById("imageInput").value = "";
+					document.getElementById("top").style.display = "none";
 					btnSend.innerHTML = `<span class="loading"></span>`;
 					btnSend.setAttribute("disabled", "true");
 					await sendMessage(inputMessage, newMessage);
@@ -190,6 +208,7 @@
 				link.style.verticalAlign = "top";
 				link.style.fontSize = "11px";
 				link.style.margin = "3px";
+				link.style.boxShadow = "-3px -3px 7px #5e687960, 3px 3px 7px #5e687960";
 			}
 		});
 	}
@@ -382,17 +401,17 @@
 
 			if (callbackData) {
 				if (message.content.image) {
-				    const compressedBase64 = pako.deflate(message.content.image, {
-					to: "string",
-				});
-				message = {
-					role: "user",
-					content: {
-						image: compressedBase64,
-						text: message.content.text,
-					},
-				};
-				console.log("Compresed data: ", message);
+					const compressedBase64 = pako.deflate(message.content.image, {
+						to: "string",
+					});
+					message = {
+						role: "user",
+						content: {
+							image: compressedBase64,
+							text: message.content.text,
+						},
+					};
+					console.log("Compresed data: ", message);
 				}
 				const formattedMessage = {
 					coming: message,

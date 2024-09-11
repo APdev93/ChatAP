@@ -31,7 +31,7 @@ $dark-bg-quote: #3d40475d;
 
 .input-image {
 	label {
-		color: white;
+		color: var(--text-color);
 		cursor: pointer;
 		font-size: 25px;
 	}
@@ -286,7 +286,8 @@ button {
 	bottom: 0;
 	left: 0;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
+	gap: 3px;
 	justify-content: center;
 	align-items: center;
 	background: transparent;
@@ -297,66 +298,88 @@ button {
 	z-index: 1;
 	color: var(--text-color);
 
-	#message-form {
-		display: flex;
-		flex-direction: row;
-		gap: 10px;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		padding-left: 10px;
-		padding-right: 10px;
-		.btn-sendmsg {
-			position: relative;
-			top: 0;
-			height: 45px;
-			font-weight: bold;
-			padding: 10px;
-			border-radius: 100px;
-			color: black;
-			border: none;
-			width: 45px;
-			text-align: center;
-			background-color: #ffffff;
-			font-size: 17px;
-			margin: none;
-			transition: 0.1 ease-in-out;
-
-			&:hover {
-				background-color: #e5e5e5;
+	.top {
+		width: 95%;
+		display: none;
+		.imagePreview {
+			border-radius: 5px;
+			padding: 5px;
+			background-color: var(--input-color);
+			border: 1px solid var(--border-color);
+			width: 100%;
+			img {
+				border-radius: 5px;
+				width: 100px;
+				height: 100px;
+				object-fit: cover;
 			}
 		}
+	}
 
-		textarea {
-			border: 1px solid var(--border-color);
-			display: block;
-			color: var(--text-color);
-			height: 45px;
-			min-height: 45px !important;
-			max-height: 100px !important;
-			border-radius: 50px;
-			width: 80%;
-			padding: 10px;
-			padding-top: 11px;
-			padding-left: 20px;
-			padding-right: 20px;
-			background-color: var(--input-color);
-			text-align: left;
-			box-sizing: border-box;
-			overflow: hidden;
-			font-family: Arial, Helvetica, sans-serif;
-			font-size: 15px;
-			resize: none;
+	.bottom {
+		width: 100%;
+		#message-form {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+			justify-content: space-between;
+			align-items: center;
+			width: 100%;
+			padding-left: 10px;
+			padding-right: 10px;
+			.btn-sendmsg {
+				position: relative;
+				top: 0;
+				height: 45px;
+				font-weight: bold;
+				padding: 10px;
+				border-radius: 100px;
+				color: black;
+				border: none;
+				width: 45px;
+				text-align: center;
+				background-color: #ffffff;
+				font-size: 17px;
+				margin: none;
+				transition: 0.1 ease-in-out;
 
-			&::placeholder {
-				text-align: left;
-				line-height: 1.4;
+				&:hover {
+					background-color: #e5e5e5;
+				}
 			}
 
-			&:focus {
-				box-shadow: transparent !important;
-				border: 1.5px solid var(--border-color);
-				outline: none;
+			textarea {
+				border: 1px solid var(--border-color);
+				display: block;
+				color: var(--text-color);
+				height: 45px;
+				min-height: 45px !important;
+				max-height: 100px !important;
+				border-radius: 50px;
+				width: 80%;
+				padding: 10px;
+				padding-top: 11px;
+				padding-left: 20px;
+				padding-right: 20px;
+				background-color: var(--input-color);
+				text-align: left;
+				box-sizing: border-box;
+				overflow: hidden;
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 15px;
+				resize: none;
+
+				&::placeholder {
+					text-align: left;
+					line-height: 1.4;
+				}
+
+				&:focus {
+					box-shadow: transparent !important;
+					border: 1.5px solid var(--border-color);
+					outline: none;
+				}
 			}
 		}
 	}
@@ -379,6 +402,17 @@ codetag {
 	align-items: center;
 	gap: 3px;
 	margin-right: 42%;
+
+	h4 {
+		span {
+			vertical-align: top;
+			font-size: 15px;
+			padding-left: 2px;
+			padding-right: 2px;
+			border-radius: 3px;
+			background-color: var(--bg-quote);
+		}
+	}
 
 	h4,
 	p {

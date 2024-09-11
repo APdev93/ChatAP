@@ -56,10 +56,12 @@
 	</head>
 	<body>
 		<nav>
-			<img src="/assets/images/chatap-logo.png" alt="logo" />
 			<div class="logo">
-				<h4>ChatAP</h4>
-				<p>With GPT-4o</p>
+				<img src="/assets/images/chatap-logo.png" alt="logo" />
+				<h4>ChatAP<span>beta</span></h4>
+			</div>
+			<div id="menuBtn" class="menu-btn">
+				<i class="fa-solid fa-book"></i>
 			</div>
 		</nav>
 
@@ -67,22 +69,33 @@
 		<div id="chat"></div>
 
 		<div class="message-form">
-			<form id="message-form">
-				<div class="input-image">
-					<input type="file" name="image" id="imageInput" />
-					<label for="imageInput" class="imgUpload"
-						><i class="fa-solid fa-image"></i>
-					</label>
+			<div class="top" id="top">
+				<div class="imagePreview">
+					<img class="shadow-sm" id="imagePrev" src="" alt="image-preview" width="100" />
 				</div>
-				<textarea
-					id="message"
-					name="message"
-					required
-					placeholder="Ask anything ChatAP..."></textarea>
-				<button id="btnSend" class="btn-sendmsg">
-					<i class="fa-solid fa-arrow-up"></i>
-				</button>
-			</form>
+			</div>
+			<div class="bottom">
+				<form id="message-form">
+					<div class="input-image">
+						<input
+							type="file"
+							name="image"
+							id="imageInput"
+							onchange="showPreview(event)" />
+						<label for="imageInput" class="imgUpload"
+							><i class="fa-solid fa-image"></i>
+						</label>
+					</div>
+					<textarea
+						id="message"
+						name="message"
+						required
+						placeholder="Ask anything ChatAP..."></textarea>
+					<button id="btnSend" class="btn-sendmsg">
+						<i class="fa-solid fa-arrow-up"></i>
+					</button>
+				</form>
+			</div>
 		</div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
@@ -93,6 +106,16 @@
 		<script>
 			hljs.highlightAll();
 		</script>
-
+		<script>
+			function showPreview(event) {
+				if (event.target.files.length > 0) {
+					let src = URL.createObjectURL(event.target.files[0]);
+					let prevCtr = document.getElementById("top");
+					let imagePreview = document.getElementById("imagePrev");
+					imagePreview.src = src;
+					prevCtr.style.display = "block";
+				}
+			}
+		</script>
 	</body>
 </html>
