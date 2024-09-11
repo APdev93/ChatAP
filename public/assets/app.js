@@ -315,7 +315,6 @@
 						function type() {
 							var btnSend = document.getElementById("btnSend");
 
-							// typing by word
 							if (wordIndex <= words.length) {
 								chatContent.innerHTML = words.slice(0, wordIndex).join(" ");
 								wordIndex++;
