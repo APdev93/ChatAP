@@ -21,6 +21,7 @@
 		"cors": "^2.8.5",
 		"ejs": "^3.1.10",
 		"express": "^4.19.2",
+		"express-session": "^1.18.0",
 		"groq-sdk": "^0.3.3",
 		"http": "^0.0.1-security",
 		"jimp": "^0.22.12",

@@ -1,3 +1,4 @@
+require("./config.js");
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
@@ -6,13 +7,13 @@ const socketIo = require("socket.io");
 const ejs = require("ejs");
 const http = require("http");
 const pako = require("pako");
+const session = require("express-session");
+const fs = require("fs");
 
 const bodyParser = require("body-parser");
 
 const ai = require("./src/ai.js");
 
-const port = 3000;
-const isMaintenace = false;
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -37,10 +38,93 @@ app.use((req, res, next) => {
 
 app.use(cors(corsOptions));
 
+app.use(
+	session({
+		secret: "chatap",
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			maxAge: 30 * 24 * 60 * 60 * 1000,
+		},
+	}),
+);
+
+function isAuth(req, res, next) {
+	if (req.session && req.session.user) {
+		return next();
+	}
+	res.redirect("/login");
+}
+
+let otps = {};
+
+const generateId = length => {
+	let r = "";
+	const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
+	for (let i = 0; i < length; i++) {
+		r += c.charAt(Math.floor(Math.random() * c.length));
+	}
+	return r;
+};
+
+const sendOTP = async (number, otp) => {
+	const url = "https://apbiz.xyz/api/wa/v1/message/send";
+	let text;
+	let footer;
+	if (!number.startsWith("62")) {
+		text = `${otp} is the verification code.
+For safety reasons, don't
+share this code.`;
+		footer = "This code expires in 5 minutes";
+	} else {
+		text = `${otp} adalah code verifikasi
+Anda. Demi kemanan, jangan
+bagikan kode ini.`;
+		footer = "Kode ini kadaluarsa dalam 5 menit";
+	}
+	const data = {
+		session: "AQWeqEqx",
+		token: "apbiz.AQWeqEqx",
+		to: number,
+		type: "interactive",
+		content: {
+			text: text,
+			footer: footer,
+			templateButtons: [
+				{
+					copyButton: {
+						displayText: "Salin OTP",
+						id: generateId(32),
+						code: otp,
+					},
+				},
+			],
+		},
+	};
+
+	try {
+		let response = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+		});
+
+		let result = await response.json();
+		if (result.status === 200) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch (e) {
+		console.log("Error went sending otp to: ", number);
+		return false;
+	}
+};
+
 // Middleware untuk file statis
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
+app.get("/", isAuth, (req, res) => {
 	if (!isMaintenace) {
 		res.render("index");
 	} else {
@@ -48,7 +132,58 @@ app.get("/", (req, res) => {
 	}
 });
 
+app.get("/register", (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
+	res.render("register");
+});
+
+app.get("/login", (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
+	res.render("login");
+});
+
+app.get("/verify", (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
+	res.render("verify");
+});
+
+app.post("/login", async (req, res) => {});
+
+app.post("/register", async (req, res) => {
+	let { username, whatsapp, password } = req.body;
+	const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+	otps[whatsapp] = otp;
+
+	try {
+		console.log(req.body);
+		let isOtpSend = await sendOTP(whatsapp, otp);
+
+		if (isOtpSend) {
+			res.render("verify", { username, whatsapp, password });
+		} else {
+			console.log("Cannot send otp to: ", whatsapp);
+		}
+	} catch (e) {
+		console.log("error went register: ", e);
+	}
+});
+
+app.post("/verify", async (req, res) => {
+	let { username, whatsapp, password, otp } = req.body;
+
+	if (otps[whatsapp] === otp) {
+		res.status(200).json({
+			status: true,
+			msg: "Registrasi berhasil",
+		});
+	} else {
+		res.status(404).json({ status: false, msg: "Otp Tidak Valid" });
+	}
+});
+
 app.post("/check_prompt", async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
 	try {
 		const { prompt } = req.body;
 
@@ -69,6 +204,7 @@ app.post("/check_prompt", async (req, res) => {
 });
 
 app.post("/completion", async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
 	const clientIp =
 		req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 	if (!isMaintenace) {
@@ -110,6 +246,7 @@ app.post("/completion", async (req, res) => {
 	}
 });
 app.post("/imagining", async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
 	const prompt = req.body.prompt;
 	if (prompt) {
 		console.log("image generation: ", prompt);
@@ -121,6 +258,7 @@ app.post("/imagining", async (req, res) => {
 	}
 });
 app.get("/download", async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
 	let imageUrl = req.query.url;
 
 	try {
@@ -161,6 +299,7 @@ const createNewRoute = () => {
 };
 
 app.post("/callback", (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
 	if (req.body) {
 		console.log("Received callback");
 		console.log(req.body);
@@ -278,7 +417,7 @@ io.on("connection", sock => {
 				sessionHash: message.sessionHash,
 			};
 		}
-		
+
 		const lastMessage = message.last.filter(msg => msg.role !== "images");
 
 		// ? Cek misal sessionHash itu ga sama kyk current route trus ngeemit error
@@ -341,6 +480,12 @@ io.on("connection", sock => {
 	sock.on("disconnect", () => {
 		createNewRoute();
 		console.log(`[SOCKET] : ${clientIp} disconnected`);
+	});
+});
+
+app.use((req, res) => {
+	res.status(404).render("404", {
+		page: req.originalUrl,
 	});
 });
 
