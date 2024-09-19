@@ -1,4 +1,5 @@
 require("./config.js");
+
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
@@ -13,6 +14,8 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 
 const ai = require("./src/ai.js");
+const db = require("./src/database.js");
+const { syncDb, syncPath } = require("./utils/database.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -61,6 +64,14 @@ let otps = {};
 const generateId = length => {
 	let r = "";
 	const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
+	for (let i = 0; i < length; i++) {
+		r += c.charAt(Math.floor(Math.random() * c.length));
+	}
+	return r;
+};
+const generateChatId = length => {
+	let r = "";
+	const c = "abcdefghijklmnopqrstuvwxyz0123456789-";
 	for (let i = 0; i < length; i++) {
 		r += c.charAt(Math.floor(Math.random() * c.length));
 	}
@@ -124,11 +135,138 @@ bagikan kode ini.`;
 // Middleware untuk file statis
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", isAuth, (req, res) => {
-	if (!isMaintenace) {
-		res.render("index");
-	} else {
-		res.render("maintenance");
+app.get("/", isAuth, async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
+	console.log(req.session.user);
+	let user = req.session.user.username;
+	let chatsData = await db.readChatsData(user);
+	res.render("index", {
+		username: req.session.user.username,
+		isNewChat: true,
+		chatId: generateChatId(35),
+		history: chatsData,
+	});
+});
+
+app.get("/chat/:chat_id", isAuth, async (req, res) => {
+	if (isMaintenace) return res.status(503).render("maintenance");
+
+	let chatId = req.params.chat_id;
+	let user = req.session.user.username;
+	let chatsData = await db.readChatsData(user);
+
+	res.render("index", {
+		username: req.session.user.username,
+		isNewChat: false,
+		chatId: chatId,
+		lastMessage: chatsData[chatId].chat,
+		history: chatsData,
+	});
+});
+
+app.post("/add_history", async (req, res) => {
+	let { chat_id, data } = req.body;
+	let user = req.session.user.username;
+	let dataPath = `./db/${user}/chat_session.json`;
+	console.log(req.body);
+	try {
+		let chatData = await db.readChatsData(user);
+		let newData;
+		console.log("LastChatToAdded: ", data);
+		if (data.role === "user" || data.role === "assistant") {
+			newData = {
+				role: data.role,
+				content: data.content,
+			};
+		}
+
+		if (chatData[chat_id]) {
+			chatData[chat_id].chat.push(newData);
+
+			await fs.writeFileSync(dataPath, JSON.stringify(chatData, null, 3));
+			res.status(200).json({
+				status: true,
+				msg: "Last message successfully added",
+				data: chatData[chat_id].chat,
+			});
+
+			console.log("new Msg has added: ", chatData[chat_id].chat);
+		}
+	} catch (e) {
+		console.log(e);
+		res.status(200).json({
+			status: false,
+			msg: "error from server",
+			data: [],
+		});
+	}
+});
+
+app.post("/get_last_message", async (req, res) => {
+	let { chat_id } = req.body;
+	let user = req.session.user.username;
+	let dataPath = `./db/${user}/chat_session.json`;
+	try {
+		let chatData = await db.readChatsData(user);
+		if (chatData[chat_id]) {
+			res.status(200).json({
+				status: true,
+				data: chatData[chat_id].chat,
+			});
+			console.log(chatData[chat_id].chat);
+		} else {
+			res.status(200).json({
+				status: true,
+				data: [],
+			});
+		}
+	} catch (e) {
+		console.log(e);
+		res.status(200).json({
+			status: false,
+			msg: "error from server",
+			data: [],
+		});
+	}
+});
+
+app.post("/get_chat_info", async (req, res) => {
+	let { chat_id } = req.body;
+	let user = req.session.user.username;
+	let dataPath = `./db/${user}/chat_session.json`;
+	try {
+		console.log(req.body);
+		let chatsData = await db.readChatsData(user);
+
+		if (!chatsData[chat_id]) {
+			let newChats = {
+				id: chat_id,
+				chat_title: "new chat",
+				timestamp: Date.now(),
+				chat: [],
+			};
+			chatsData[chat_id] = newChats;
+			await fs.writeFileSync(dataPath, JSON.stringify(chatsData, null, 3));
+			res.status(200).json({
+				status: true,
+				newChat: true,
+				chat: chatsData[chat_id],
+			});
+		} else {
+			res.status(200).json({
+				status: true,
+				newChat: false,
+				chat: chatsData[chat_id],
+			});
+		}
+	} catch (e) {
+		console.log(e);
+		res.status(200).json({
+			status: false,
+			msg: "error from server",
+			newChat: false,
+			chat: null,
+		});
 	}
 });
 
@@ -147,7 +285,32 @@ app.get("/verify", (req, res) => {
 	res.render("verify");
 });
 
-app.post("/login", async (req, res) => {});
+app.post("/login", async (req, res) => {
+	let { whatsapp } = req.body;
+
+	if (whatsapp) {
+		let found = await db.login(req, res);
+		if (found) {
+			const userData = await db.readAllUser();
+			const user = userData[whatsapp];
+			req.session.user = user;
+			res.status(200).json({
+				status: true,
+				msg: "Login berhasil",
+			});
+		} else {
+			res.status(404).json({
+				status: false,
+				msg: "Akun tidak di temukan",
+			});
+		}
+	} else {
+		res.status(404).json({
+			status: false,
+			msg: "Whatsapp dibutuhkan",
+		});
+	}
+});
 
 app.post("/register", async (req, res) => {
 	let { username, whatsapp, password } = req.body;
@@ -173,10 +336,20 @@ app.post("/verify", async (req, res) => {
 	let { username, whatsapp, password, otp } = req.body;
 
 	if (otps[whatsapp] === otp) {
-		res.status(200).json({
-			status: true,
-			msg: "Registrasi berhasil",
-		});
+		const newUser = {
+			whatsapp: whatsapp,
+			username: username,
+			password: password,
+			userid: generateId(8),
+		};
+
+		let createdUser = await db.createUser(newUser);
+		console.log(createdUser);
+		if (createdUser.status) {
+			res.status(200).json(createdUser);
+		} else {
+			res.status(500).json(createdUser);
+		}
 	} else {
 		res.status(404).json({ status: false, msg: "Otp Tidak Valid" });
 	}
@@ -298,8 +471,9 @@ const createNewRoute = () => {
 	currentRoute.message = b;
 };
 
-app.post("/callback", (req, res) => {
+app.post("/callback", async (req, res) => {
 	if (isMaintenace) return res.status(503).render("maintenance");
+
 	if (req.body) {
 		console.log("Received callback");
 		console.log(req.body);
@@ -313,8 +487,8 @@ app.post("/callback", (req, res) => {
 			return res.status(500).json({ msg: "Error From Server" });
 		const act = req.headers["x-action"];
 		const msg = req.body?.msg?.msg || "";
-		console.log(`Action : ${act}`);
-		console.log(`Message : ${Buffer.from(msg, "base64").toString("utf-8")}`);
+		/* console.log(`Action : ${act}`); */
+		/* console.log(`Message : ${Buffer.from(msg, "base64").toString("utf-8")}`); */
 
 		// ? Kalo act revalidate
 		if (act === "revalidate") {
@@ -355,7 +529,6 @@ app.post("/callback", (req, res) => {
 				snd: currentRoute.message,
 			});
 		}
-		console.log("Generated routes:", currentRoute);
 	} else {
 		res.status(500).json({ msg: "Callback not successful" });
 	}
@@ -489,6 +662,12 @@ app.use((req, res) => {
 	});
 });
 
-server.listen(port, () => {
-	console.log("[SERVER] : Server running, on port: ", port);
-});
+const startServer = async () => {
+	await syncDb();
+	await syncPath("./db/");
+	server.listen(port, () => {
+		console.log("[SERVER] : Server running, on port: ", port);
+	});
+};
+
+startServer();

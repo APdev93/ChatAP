@@ -1,0 +1,36 @@
+{
+   "hevvj8bw49sxd34umznz7n9a8oiqy6yqqk4": {
+      "id": "hevvj8bw49sxd34umznz7n9a8oiqy6yqqk4",
+      "chat_title": "new chat",
+      "timestamp": 1726743305366,
+      "chat": [
+         {
+            "role": "user",
+            "content": "Hai"
+         },
+         {
+            "role": "assistant",
+            "content": "Hello! How can I assist you today? If you have any questions or need information, feel free to ask!"
+         },
+         {
+            "role": "user",
+            "content": "Apa kabar?"
+         }
+      ]
+   },
+   "o7hl2fbfexu5hhrmmg1lzeph850a7qq4ork": {
+      "id": "o7hl2fbfexu5hhrmmg1lzeph850a7qq4ork",
+      "chat_title": "new chat",
+      "timestamp": 1726743338585,
+      "chat": [
+         {
+            "role": "user",
+            "content": "Berita hari ini"
+         },
+         {
+            "role": "assistant",
+            "content": "Silakan tunggu sebentar, saya akan mencari berita terbaru hari ini untuk Anda. \n\n1. **detikcom** - Informasi berita terkini dan terbaru dari berbagai bidang, seperti politik, ekonomi, olahraga, hiburan, teknologi, dan lainnya. [[1]](https://www.detik.com/)\n2. **Liputan6.com** - Menyajikan berbagai berita terkini, kabar terbaru hari ini Indonesia dan dunia seputar politik, peristiwa, regional, bisnis, bola, tekno dan gosip artis. [[2]](https://www.liputan6.com/)\n3. **Kompas.com** - Baca berita tanpa iklan di situs berita terpopuler di Indonesia, dari politik hingga teknologi. [[3]](https://www.kompas.com/)\n4. **CNN Indonesia** - Menyajikan berita terbaru dan terkini dari Indonesia dan dunia. [[4]](https://www.cnnindonesia.com/nasional)\n5. **Tempo.co** - Memberikan berita terkini dan terbaru dari berbagai bidang, termasuk politik dan ekonomi. [[5]](https://www.tempo.co/)\n6. **ANTARA News** - Menyajikan berita terkini dan terpercaya dari berbagai bidang, termasuk olahraga dan hiburan. [[9]](https://www.antaranews.com/)\n7. **iNews Portal** - Berita terkini hari ini yang mencakup hukum, politik, nasional, dan internasional. [[16]](https://www.inews.id/news)\n\nAnda dapat mengunjungi link tersebut untuk mendapatkan informasi lebih lanjut mengenai berita terbaru hari ini."
+         }
+      ]
+   }
+}

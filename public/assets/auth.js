@@ -1,4 +1,60 @@
 const verifyButton = document.getElementById("verifyButton");
+const loginButton = document.getElementById("loginButton");
+
+loginButton.addEventListener("click", async () => {
+	const whatsapp = document.getElementById("whatsapp").value;
+	const password = document.getElementById("password").value;
+
+	let loginData = {
+		whatsapp: whatsapp,
+		password: password,
+	};
+	try {
+		let response = await fetch("/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(loginData),
+		});
+		let data = await response.json();
+		if (!data.status) {
+			Swal.fire({
+				icon: "error",
+				title: "Login Failed",
+				text: data.msg,
+				customClass: {
+					popup: "swal2-popup",
+					confirmButton: "swal2-confirm",
+				},
+			});
+		} else {
+			Swal.fire({
+				icon: "success",
+				title: "Login Successful",
+				showConfirmButton: false,
+				timer: 1500,
+				customClass: {
+					popup: "swal2-popup",
+					confirmButton: "swal2-confirm",
+				},
+			}).then(() => {
+				window.location.href = "/";
+			});
+		}
+	} catch (e) {
+		console.log(e);
+		Swal.fire({
+			icon: "error",
+			title: "Error",
+			text: "Something went wrong. Please try again later.",
+			customClass: {
+				popup: "swal2-popup",
+				confirmButton: "swal2-confirm",
+			},
+		});
+	}
+});
 
 verifyButton.addEventListener("click", async () => {
 	const otp1 = document.getElementById("otp-1").value;
