@@ -26,11 +26,12 @@ const getLastChat = async () => {
 	} catch (e) {
 		console.log(e);
 	}
-};
+}; 
+
 
 window.onload = () => {
 	getLastChat();
-	console.log(messages)
+	console.log(messages);
 };
 
 const MAX_FILE_SIZE = 50 * 1024;
@@ -237,11 +238,11 @@ function errorMessage(error) {
 }
 function getLinkInfo() {
 	document.querySelectorAll("a").forEach(function (link) {
-		link.style.color = "#0484ff";
 		if (
 			(link.textContent.includes("[") && link.textContent.includes("]")) ||
 			(link.textContent.includes("[[") && link.textContent.includes("]]"))
 		) {
+		link.style.color = "#0484ff";
 			link.textContent = link.textContent.replace("[", "").replace("]", "");
 			link.textContent = link.textContent.replace("[[", "").replace("]]", "");
 			link.style.textDecoration = "none";

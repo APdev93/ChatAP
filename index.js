@@ -253,11 +253,22 @@ app.post("/get_chat_info", async (req, res) => {
 				chat: chatsData[chat_id],
 			});
 		} else {
-			res.status(200).json({
-				status: true,
-				newChat: false,
-				chat: chatsData[chat_id],
-			});
+
+				let percakapan = chatsData[chat_id].chat
+					.map(msg => {
+						return `${msg.role}: ${msg.content}`;
+					})
+					.join("\n");
+				let topic = await ai.generateTopic({ topic: percakapan });
+				console.log("TOPIC HAS BEEN CHECK ", topic);
+				chatsData[chat_id].chat_title = JSON.parse(topic).topic;
+				await fs.writeFileSync(dataPath, JSON.stringify(chatsData, null, 3));
+				res.status(200).json({
+					status: true,
+					newChat: false,
+					chat: chatsData[chat_id],
+				});
+
 		}
 	} catch (e) {
 		console.log(e);
@@ -398,7 +409,7 @@ app.post("/completion", async (req, res) => {
 				});
 			}
 		} else if (model == "gpt4o") {
-			let data = await ai.GPT4o(content);
+			let data = await ai.GPT4o_v2(content);
 			if (req) {
 				console.log(`new request. model: ${model}`);
 			}
@@ -488,7 +499,9 @@ app.post("/callback", async (req, res) => {
 		const act = req.headers["x-action"];
 		const msg = req.body?.msg?.msg || "";
 		/* console.log(`Action : ${act}`); */
-		/* console.log(`Message : ${Buffer.from(msg, "base64").toString("utf-8")}`); */
+		console.log(
+			`Action : ${act}\nMessage : ${Buffer.from(msg, "base64").toString("utf-8")}`,
+		);
 
 		// ? Kalo act revalidate
 		if (act === "revalidate") {

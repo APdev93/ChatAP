@@ -6,6 +6,8 @@ const geminiKey = "AIzaSyDDhOuxa13exugJQcMQsiWUacOJq2DGSL4";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(geminiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const cheerio = require("cheerio");
+const https = require("https");
 
 const root = process.cwd();
 const now = new Date();
@@ -78,9 +80,10 @@ const wm = imageBuffer => {
 };
 
 const cookies = [
-	"10g0hhWnfelLm8N32MU1ATKECUTaRLBYwC-M7lfO7euODTQOGs3HStuLHtx-ShkEZHtackX5AFUGCtx2dG2iUX_It7TA5198oMkj_A4IIuTXQ-3vF8Us4Vuz8fLevtFD4LAtGygDA4k4_wG73TAtqU6sC_Oax1V9RpC0acJ4B9I4eK2Fr3q4d6Bc4gfj5kJEYhEr_UaHog56f9efTE8zCpw",
-	"1tBqBgOXDewYQsibIlviW6vbFU3FPcbfMLqetjMOQ0K9-CC0t40uynErXyBoOck1OdHpzAlmA8_kilSx-KfT8WhjPPIQkXhnzPaKM5ZkYSs9Rr2FwLM4Za3Xm6-vJjq92daNK4Ms1B3-YBHq9U_arzaeMUB4yOK8HL2NTGyWjf4KsJlhf4XteUs3iPrT2KaVyy3xAZuoTTfX4YrMyULbnHQ",
-	"1M39JTr1YlY2n5r-qNBQUCNdFuFY_QdK6qF6_m8Klq5nQSOguLI89oZiJuQfkWy3wna2CyYhUhefwoZyUwrmEcuI4SA-DC5hC29OafQXartJkLAOa3exvezfCACbqpKL2_1xRnhQr4zNXkxU94k_3YcSrCzf5HwKyR-g63_E1AgSy78c6n7cOb7LgZjIIRd0MQ_Olp9VoeEccW3c8sdriZgZWijAUUun_oOPtzUNUIHM",
+	"1cQ11ef498Fb-n5ygG2IwMEBSdMmI2GADtOFu5A0bZd0El7y-GYsbebMH2hBKdhAjBLhhNOQPAg53IXjWvcWKpcZV-8MVkNRUYzcNSyKQRUB7I61IjbudDDQkJ9jIvQYYkhmnnGqgrGYEIUmu5sSGZdWM8X6uE0wRfsppma1I6ZN9_3NI3iURxhRDV45BUd1iujokR5EFG8DYjZ36UCp9sg",
+	"1PRbjGHKlxZ60R8xNDVUfthsB9yWOY8NtmW4iEJZHDIFI9gzXn_jWuE2F9Kk45flFJ0_pEs876UoQyWot90CPUxhAd2QiuXWTZPX-oA_WqNlQBVMyHKU823hLafUEVC9cMhXA1elvlkqsGfdpcQQs18IOoL0tXbLUXPSFTQekiEPUhh9cMf8gH08QVshXVS-1oUrwJEqGoV8BBpZ79DsrWg",
+	"1OfAknMstfJWW_yeJzazts0ewGsYZZO60D-aiSaN7FdOSnloLrqgAelmYTj70_aW1ufJRMFTqjWCihiqhztyb66u-cDmJLuqdhbVzaGSXyyXd0j2IxfvTV6uqFrJDyIgRtiue_PZrzK2ozXHSfvSiiLdDFFDA5zQdmy850lbzpx7-9EPwVja_nZa0cG2EzXcHhie60opXmwsQvmHVCGi3bA",
+	"1zO-ORtdQHI87EJufdjLcIkIAKd5aOvaszNpcaklsYY2gzSmMQFxTQJs_Lx3gCqKDuEjH9L2RrwXjTItaQjYklPtBxPJNARVQMR8sHnzR3Sa5BaiHhq1jX5pTXqD8m66TiBNh3BCmlp_NU3WUhulmy-Pj5lPljw349w9JyinKBVrX3jI09bKnm9wkhEiANPqtyNx3TaaKOSLuWE6W1_kZ7g",
 ];
 
 function getRandom(array) {
@@ -110,9 +113,8 @@ async function searchWeb(query) {
 			text += `description: ${result.description}\n`;
 			text += "\n";
 		});
-		return text;
 
-		return text;
+		return JSON.stringify(text);
 	} catch (error) {
 		console.error(
 			`Error: ${error.toString()}. Report this error to Developer(YanzBotz)`,
@@ -120,6 +122,102 @@ async function searchWeb(query) {
 		return { error: error.message };
 	}
 }
+
+const ua = [
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.62",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
+];
+
+const getRandomUserAgent = () => {
+	return ua[Math.floor(Math.random() * ua.length)];
+};
+
+const fetchSearchResults = async (
+	term,
+	num,
+	lang = "id",
+	safe = "active",
+	sslVerify = true,
+	proxy = null,
+	timeout = 5000,
+	region = null,
+) => {
+	const response = await axios.get("https://www.google.com/search", {
+		headers: {
+			"User-Agent": getRandomUserAgent(),
+		},
+		params: {
+			q: term,
+			num: num + 2,
+			hl: lang,
+			safe: safe,
+			gl: region,
+		},
+		httpsAgent: proxy ? new https.Agent({ rejectUnauthorized: sslVerify }) : null,
+		timeout: timeout,
+	});
+	return response.data;
+};
+
+const searchGoogle = async (
+	term,
+	num = 10,
+	proxy = null,
+	sleepInterval = 0,
+	region = null,
+) => {
+	let start = 0;
+	const result = [];
+	let totalResults = 0;
+
+	while (totalResults < num) {
+		const html = await fetchSearchResults(
+			term,
+			num - totalResults,
+			"id",
+			"active",
+			true,
+			proxy,
+			5000,
+			region,
+		);
+		const $ = cheerio.load(html);
+		const resultBlock = $("div.g");
+		let newResults = 0;
+
+		resultBlock.each((_, element) => {
+			const link = $(element).find("a").attr("href");
+			const title = $(element).find("h3").text();
+			const description = $(element)
+				.find('div[style="-webkit-line-clamp:2"]')
+				.text();
+
+			if (link && title && description) {
+				result.push({ url: link, title, description });
+				totalResults++;
+				newResults++;
+
+				if (totalResults >= num) {
+					return false;
+				}
+			}
+		});
+
+		if (newResults === 0) {
+			break;
+		}
+
+		start += 10;
+		await new Promise(res => setTimeout(res, sleepInterval));
+	}
+	console.log(result);
+	return result;
+};
 
 async function generateImage(prompt) {
 	try {
@@ -249,7 +347,7 @@ async function checkPrompt(prompt) {
 		];
 
 		const response = await axios.post(
-			"https://chatbot-ji1z.onrender.com/chatbot-ji1z",
+			"https://api.deepenglish.com/api/gpt/chat",
 			{ messages },
 			{
 				headers: {
@@ -261,7 +359,7 @@ async function checkPrompt(prompt) {
 
 		if (response.data) {
 			const checked = await jsonExtractor(
-				response.data.choices[0].message.content,
+				response.data.data.choices[0].message.content,
 			);
 
 			if (checked.cmd === "imaging") {
@@ -277,6 +375,56 @@ async function checkPrompt(prompt) {
 					msg: null,
 				};
 			}
+		} else {
+			throw new Error("Unexpected response structure");
+		}
+	} catch (e) {
+		console.error("Error in checkPrompt:", e.message || e);
+		throw e;
+	}
+}
+
+async function generateTopic(msg) {
+	let percakapan = "";
+	console.log("msg to checkkk: ", msg);
+	/*
+	msg.forEach(msg => {
+		percakapan += `role: ${msg.role}`;
+		percakapan += `content: ${msg.content}`;
+		percakapan += `\n`;
+	});*/
+
+	console.log("Trying check Topic");
+	try {
+		const messages = [
+			{
+				role: "system",
+				content: `Ini adalah TOPIC Checker, APAKAH TOPIK DARI PERCAKAPAN USER DAN ASSISTANT INI?\n\n Hasilkan Respon JSON seperti di bawah:
+				{
+				   "topic": "Topik apakah yang di bahas? gunakan format maksimal 5 kata"
+				}`,
+			},
+			{
+				role: "user",
+				content: `${msg.topic}`,
+			},
+		];
+
+		const response = await axios.post(
+			"https://api.deepenglish.com/api/gpt/chat",
+			{ messages },
+			{
+				headers: {
+					Accept: "text/event-stream",
+					"Content-Type": "application/json",
+				},
+			},
+		);
+
+		if (response.data) {
+			const result = response.data.data.choices[0].message.content;
+			console.log(result);
+			return result.replace(/```json\s*|\s*```/g, "");
 		} else {
 			throw new Error("Unexpected response structure");
 		}
@@ -309,7 +457,7 @@ async function GPT4o(data) {
 	} else {
 		try {
 			console.log(data);
-			let searchResult = await searchWeb(data[data.length - 1].content);
+			let searchResult = await searchGoogle(data[data.length - 1].content, 10);
 			console.log("Search results: ", searchResult);
 			const messages = [
 				{
@@ -383,5 +531,112 @@ Make sure the numbering is sequential, and URLs are correctly placed at the end 
 		}
 	}
 }
+async function GPT4o_v2(data) {
+	if (data[data.length - 1].content.image) {
+		try {
+			console.log("Data with image");
+			const prompt =
+				"Jawab dan sertakan markdown it, ini prompt saya: " +
+				data[data.length - 1].content.text;
+			const image = {
+				inlineData: {
+					data: data[data.length - 1].content.image,
+					mimeType: "image/png",
+				},
+			};
 
-module.exports = { checkPrompt, gpt, generateImage, GPT4o };
+			const result = await model.generateContent([prompt, image]);
+			console.log(result.response.text());
+			return { data: result.response.text(), author: "AP" };
+		} catch (e) {
+			console.log("Error when reading image");
+		}
+	} else {
+		try {
+			console.log(data);
+			let searchResult = await searchGoogle(data[data.length - 1].content, 10);
+			console.log("Search results: ", searchResult);
+			const messages = [
+				{
+					role: "system",
+					content: `Sekarang: ${formattedDateTime}\n
+				Hasil pencarian: ${searchResult}\n
+When providing answers that include URLs or references, ensure the references are formatted using sequential numbering with URLs as follows: 
+- Each reference should be numbered starting from 1.
+- Format the references in this structure: **Reference Name** - Description. [[1]]($reference).
+- If the text contains multiple references, continue numbering sequentially (e.g., [[1]]($reference), [[2]]($reference2)).
+- URLs should also be included in any descriptive text with hyperlinks where appropriate.
+
+For example:
+1. **Website Name** - Short description. [[1]]($news_url)
+2. **Another Website** - Another short description. [[2]]($news_url2)
+
+Make sure the numbering is sequential, and URLs are correctly placed at the end of each reference.\n
+				SHOW SEARCH RESULTS PROMPT IF USER REQUESTS SEARCH VIA WEB, OR RECOGNIZE PROMPT, WHETHER IT REQUESTS SEARCH FROM WEB OR NOT, IF USER DOES NOT REQUEST SEARCH FROM WEB, THEN SEARCH AT YOUR MODEL;\n\n
+				This is ChatAP, Named ApAI, the latest AI assistant from APbiz, based on GPT-4o. Data updated in 2024, up to date\n you can generate images, you can read or interact with the images, you can searching website, you can search news, If the prompt indicates to create an image, then return a response like this:
+				{
+				    "cmd":"bingimg",
+				    "cfg": {
+				        "prompt":"prompt entered by the user"
+				      },
+				    "msg": "$prompt_image_generated_from_ai,and image description"
+				} . Otherwise, the response is as usual.`,
+				},
+				...data,
+			];
+
+			const response = await axios.post(
+				"https://api.deepenglish.com/api/gpt/chat",
+				{ messages },
+				{
+					headers: {
+						Accept: "text/event-stream",
+						"Content-Type": "application/json",
+					},
+				},
+			);
+			console.log(response);
+
+			let answer = await jsonExtractor(
+				response.data.data.choices[0].message.content,
+			);
+			console.log(answer);
+			if (answer.cmd == "bingimg") {
+				const prompt = answer.cfg.prompt;
+				const message = answer.msg || "Okay, I'm creating an image for you!";
+
+				try {
+					const data = await generateImage(prompt);
+					let base64Image = data.image.toString("base64");
+					const imgSrc = `data:image/png;base64,${base64Image}`;
+					if (data.success) {
+						return {
+							status: true,
+							message: answer.msg,
+							image: imgSrc,
+							author: "AP",
+						};
+					} else {
+						return { status: false, image: null, author: "AP" };
+					}
+				} catch (error) {
+					console.error("Um, it looks like something went wrong.", error);
+					return { status: false, image: null, author: "AP" };
+				}
+			} else {
+				return { data: answer.msg, author: "AP" };
+			}
+		} catch (e) {
+			throw e;
+		}
+	}
+}
+
+module.exports = {
+	checkPrompt,
+	gpt,
+	generateImage,
+	GPT4o,
+	GPT4o_v2,
+	generateTopic,
+};
