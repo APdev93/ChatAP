@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>test</title>
+		<style type="text/css" media="all">
+			.search-box {
+				border: 1px solid #00000046;
+				border-radius: 5px;
+				padding: 0;
+				padding-bottom: 0;
+				list-style-type: none;
+				padding-left: 10px;
+			}
+			.search-box div li {
+				border-top: 1px solid #00000046;
+				padding: 15px;
+				padding-right: 50px;
+				margin: 10px 0;
+				margin: 0;
+				position: relative;
+				padding-left: 30px; /* Memberi jarak untuk custom marker */
+			}
+			.search-box div li:last-child {
+				border: none;
+				padding-right: 0 !important;
+				padding-top: 0 !important;
+			}
+			li .last {
+				border-top: 1px solid #00000046;
+				padding-top: 13px;
+				padding-right: 50px;
+			}
+			.search-box div li div {
+				margin-left: 5px;
+			}
+		.search-box div li::before {
+				top: 23px;
+				content: "";
+				position: absolute;
+				left: 15px;
+				transform: translateY(-50%);
+				width: 10px;
+				height: 10px;
+				background-color: blue;
+				border: 3px double white; /* Border double */
+				border-radius: 100%; /* Membuat bentuk lingkaran */
+				box-shadow: 0px 0px 1px 1px #2f65df1a;
+				transition:
+					border-color 1.5s ease-in-out,
+					opacity 0.5s ease-in-out; /* Transisi untuk border dan opacity */
+				animation: pulse-animation 1.5s infinite; /* Animasi berdenyut */
+			}
+			@keyframes pulse-animation {
+				0% {
+					box-shadow: 0 0 0 0px rgb(52, 48, 232);
+				}
+				100% {
+					box-shadow: 0 0 0 6px rgba(125, 191, 207, 0);
+				}
+			}
+		.search-box div li.success::before {
+				animation: none; 
+				width: 10px;
+				height: 10px;
+				top: 23px;
+				background-color: blue; /* Warna background biru */
+				border-color: white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.search-box div li.success::before {
+				content: "✔"; 
+				color: white;
+				font-size: 8px;
+			}
+			.search-box div li.success::after {
+				background-color: white; 
+			}
+			.skeleton-loader {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				width: 95%;
+				padding: 10px;
+				background-color: #ffffff;
+				border-radius: 10px;
+			}
+
+			.skeleton-loader div {
+				background-color: #9c9c9c;
+				border-radius: 4px;
+				animation: shimmer 5s infinite linear;
+			}
+
+			.skeleton-text {
+				width: 100%;
+				height: 15px;
+			}
+
+			.skeleton-text.short {
+				width: 70%;
+			}
+			.skeleton-text.mid {
+				width: 80%;
+			}
+
+			@keyframes shimmer {
+				0% {
+					background-position: -500px 0;
+				}
+				100% {
+					background-position: 500px 0;
+				}
+			}
+
+			.skeleton-loader div {
+				background-image: linear-gradient(
+					90deg,
+					#f0f0f0 25%,
+					#e0e0e0 50%,
+					#f0f0f0 75%
+				);
+				background-size: 500px 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="skeleton-loader">
+			<div class="skeleton-text"></div>
+			<div class="skeleton-text mid"></div>
+			<div class="skeleton-text short"></div>
+		</div>
+		<ul class="search-box">
+			<div class="box-ctr">
+				<div class="search-result">
+					<h3>Search Results</h3>
+				</div>
+				<li class="success">
+					<div class="content">loremmmm</div>
+				</li>
+				<li>
+					<div class="content last">
+						Occaecat in aute voluptate ad cillum culpa proident id qui. Esse ad fugiat
+						tempor et fugiat cillum culpa commodo deserunt velit enim adipisicing.
+						Anim in dolor amet est. Et magna excepteur ex duis ea voluptate pariatur
+						sit minim cupidatat. Consectetur ullamco cillum pariatur eu quis magna
+						consequat aute.
+					</div>
+				</li>
+			</div>
+		</ul>
+	</body>
+</html>

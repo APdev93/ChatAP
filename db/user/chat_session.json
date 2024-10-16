@@ -1,0 +1,17 @@
+{
+	"chat_id": {
+		"id": "",
+		"chat_title": "",
+		"timestamp": 0,
+		"chat": [
+			{
+				"role": "user",
+				"content": "hai"
+			},
+			{
+				"role": "assistant",
+				"content": "hai juga"
+			}
+		]
+	}
+}

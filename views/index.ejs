@@ -56,37 +56,124 @@
 	</head>
 	<body>
 		<nav>
-			<img src="/assets/images/chatap-logo.png" alt="logo" />
 			<div class="logo">
-				<h4>ChatAP</h4>
-				<p>With GPT-4o</p>
+				<img src="/assets/images/chatap-logo.png" alt="logo" />
+				<h4>ChatAP<span>beta</span></h4>
+			</div>
+			<div id="show-nav" class="menu-btn">
+				<i class="fa-solid fa-book"></i>
 			</div>
 		</nav>
+		
+		<div class="nav-menu hide" id="navItem">
+			<div class="head">
+				<a id="close-nav"><i class="fa-regular fa-square-caret-right"></i></a>
+				<a href="/"><i class="fa-regular fa-pen-to-square"></i></a>
+			</div>
+			<div class="history-ctr">
+				<ul>
+                  <% for (let key in history) { %>
+                    <li><a href="/chat/<%= history[key].id %>"><%= history[key].chat_title %></a></li>
+                  <% } %>
+                </ul>
+			</div>
+			<div class="foot">
+				<a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+				<p>Account</p>
+				<img width="50" src="/assets/images/chatap-logo.png" alt="logo" />
+			</div>
+		</div>
+		
 
-		<div class="chat-container" id="chat-container"></div>
+		<div class="chat-container" id="chat-container">
+		    <% if (!isNewChat) { %>
+		    <% lastMessage.forEach((msg) => {  %>
+                <div class="chat-bubble <%= msg.role === 'assistant' ? 'chat-receiver' : 'chat-sender' %>">
+                    <div class="chat-content">
+                        <%= msg.content %>
+                    </div>
+                </div>
+            <% }) %>
+		    <% } %>
+		</div>
 		<div id="chat"></div>
 
 		<div class="message-form">
-			<form id="message-form">
-				<textarea
-					id="message"
-					name="message"
-					required
-					placeholder="Ask anything ChatAP..."></textarea>
-				<button id="btnSend" class="btn-sendmsg">
-					<i class="fa-solid fa-arrow-up"></i>
-				</button>
-			</form>
+			<div class="top" id="top">
+				<div class="imagePreview">
+					<img class="shadow-sm" id="imagePrev" src="" alt="image-preview" width="100" />
+				</div>
+			</div>
+			<div class="bottom">
+				<form id="message-form">
+					<input type="hidden" id="chat_id" value="<%= chatId %>" />
+					<div class="input-image">
+						<input
+							type="file"
+							accept="image/*"
+							name="image"
+							id="imageInput"
+							onchange="showPreview(event)" />
+						<label for="imageInput" class="imgUpload"
+							><i class="fa-solid fa-image"></i>
+						</label>
+					</div>
+					<textarea
+						id="message"
+						name="message"
+						required
+						placeholder="Ask anything ChatAP..."></textarea>
+					<button id="btnSend" class="btn-sendmsg">
+						<i class="fa-solid fa-arrow-up"></i>
+					</button>
+				</form>
+			</div>
 		</div>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script
-			src="/assets/app.min.js"
+			src="/assets/app.js"
 			type="text/javascript"
 			charset="utf-8"></script>
 		<script>
 			hljs.highlightAll();
 		</script>
+		<script>
+		
+		function copyCode(e) {
+		    const t = document.getElementById(e).innerText;
+		    navigator.clipboard.writeText(t);
+		    alert("copied✓");
+	    }
+	    
+	    document.getElementById("show-nav").addEventListener("click", function () {
+				var menu = document.getElementById("navItem");
 
+				menu.classList.remove("hide");
+				menu.classList.remove("menu-hide");
+				menu.classList.add("menu-show");
+			});
+
+			document.getElementById("close-nav").addEventListener("click", function () {
+				var menu = document.getElementById("navItem");
+
+				menu.classList.remove("menu-show");
+				menu.classList.add("menu-hide");
+
+				setTimeout(function () {
+					menu.classList.add("hide");
+				}, 300);
+			});
+		
+			function showPreview(event) {
+				if (event.target.files.length > 0) {
+					let src = URL.createObjectURL(event.target.files[0]);
+					let prevCtr = document.getElementById("top");
+					let imagePreview = document.getElementById("imagePrev");
+					imagePreview.src = src;
+					prevCtr.style.display = "block";
+				}
+			}
+		</script>
 	</body>
 </html>
