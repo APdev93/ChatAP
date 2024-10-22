@@ -1,14 +1,8 @@
 {
-	"whatsapp": {
-		"whatsapp": "",
-		"username": "",
-		"password": "",
-		"userid": ""
-	},
-	"6287845032372": {
-		"whatsapp": "6287845032372",
-		"username": "apdev",
-		"password": "apdev",
-		"userid": "c1uiA6p3"
-	}
+    "6287845032372": {
+        "whatsapp": "6287845032372",
+        "username": "admin",
+        "password": "admin",
+        "userid": "E3g4xhlW"
+    }
 }

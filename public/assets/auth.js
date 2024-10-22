@@ -1,7 +1,4 @@
-const verifyButton = document.getElementById("verifyButton");
-const loginButton = document.getElementById("loginButton");
-
-loginButton.addEventListener("click", async () => {
+document.getElementById("loginButton").addEventListener("click", async () => {
 	const whatsapp = document.getElementById("whatsapp").value;
 	const password = document.getElementById("password").value;
 
@@ -56,7 +53,7 @@ loginButton.addEventListener("click", async () => {
 	}
 });
 
-verifyButton.addEventListener("click", async () => {
+async function verify() {
 	const otp1 = document.getElementById("otp-1").value;
 	const otp2 = document.getElementById("otp-2").value;
 	const otp3 = document.getElementById("otp-3").value;
@@ -124,4 +121,4 @@ verifyButton.addEventListener("click", async () => {
 			},
 		});
 	}
-});
+};
