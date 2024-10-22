@@ -253,22 +253,20 @@ app.post("/get_chat_info", async (req, res) => {
 				chat: chatsData[chat_id],
 			});
 		} else {
-
-				let percakapan = chatsData[chat_id].chat
-					.map(msg => {
-						return `${msg.role}: ${msg.content}`;
-					})
-					.join("\n");
-				let topic = await ai.generateTopic({ topic: percakapan });
-				console.log("TOPIC HAS BEEN CHECK ", topic);
-				chatsData[chat_id].chat_title = JSON.parse(topic).topic;
-				await fs.writeFileSync(dataPath, JSON.stringify(chatsData, null, 3));
-				res.status(200).json({
-					status: true,
-					newChat: false,
-					chat: chatsData[chat_id],
-				});
-
+			let percakapan = chatsData[chat_id].chat
+				.map(msg => {
+					return `${msg.role}: ${msg.content}`;
+				})
+				.join("\n");
+			let topic = await ai.generateTopic({ topic: percakapan });
+			console.log("TOPIC HAS BEEN CHECK ", topic);
+			chatsData[chat_id].chat_title = JSON.parse(topic).topic;
+			await fs.writeFileSync(dataPath, JSON.stringify(chatsData, null, 3));
+			res.status(200).json({
+				status: true,
+				newChat: false,
+				chat: chatsData[chat_id],
+			});
 		}
 	} catch (e) {
 		console.log(e);
@@ -345,7 +343,9 @@ app.post("/register", async (req, res) => {
 
 app.post("/verify", async (req, res) => {
 	let { username, whatsapp, password, otp } = req.body;
+	console.log("trying verify account ", req.body);
 
+	try {
 	if (otps[whatsapp] === otp) {
 		const newUser = {
 			whatsapp: whatsapp,
@@ -363,6 +363,10 @@ app.post("/verify", async (req, res) => {
 		}
 	} else {
 		res.status(404).json({ status: false, msg: "Otp Tidak Valid" });
+	}
+	} catch (e) {
+		console.log(e);
+		res.status(404).json({ status: false, msg: "Error from server" });
 	}
 });
 

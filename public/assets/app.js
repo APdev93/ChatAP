@@ -26,8 +26,7 @@ const getLastChat = async () => {
 	} catch (e) {
 		console.log(e);
 	}
-}; 
-
+};
 
 window.onload = () => {
 	getLastChat();
@@ -84,6 +83,7 @@ const addHistoryMsg = async newMessage => {
 			messages.push(newMessage);
 			console.log(messages);
 		}
+
 		return true;
 	} catch (e) {
 		console.log(e);
@@ -242,7 +242,7 @@ function getLinkInfo() {
 			(link.textContent.includes("[") && link.textContent.includes("]")) ||
 			(link.textContent.includes("[[") && link.textContent.includes("]]"))
 		) {
-		link.style.color = "#0484ff";
+			link.style.color = "#0484ff";
 			link.textContent = link.textContent.replace("[", "").replace("]", "");
 			link.textContent = link.textContent.replace("[[", "").replace("]]", "");
 			link.style.textDecoration = "none";
